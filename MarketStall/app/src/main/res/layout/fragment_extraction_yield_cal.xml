@@ -1,0 +1,75 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.mrl.coffee_book.view.fragments.FragmentExtractionYieldCal"
+    android:orientation="vertical">
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/text_input_layout_coffee_dose"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/form_icon_margin_16"
+        android:theme="@style/AppTheme">
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/edit_text_coffee_dose"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:hint="@string/coffee_dose"
+            android:text="15"
+            android:theme="@style/AppTheme"/>
+
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/text_input_layout_brew_yield"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/form_icon_margin_16"
+        android:theme="@style/AppTheme">
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/edit_text_brew_yield"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:hint="@string/brew_yield"
+            android:text="200"
+            android:theme="@style/AppTheme"/>
+
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/text_input_layout_tds"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/form_icon_margin_16"
+        android:theme="@style/AppTheme">
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/edit_text_tds"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:hint="@string/text_TDS_percent"
+            android:text="1.70"
+            android:theme="@style/AppTheme"/>
+
+    </android.support.design.widget.TextInputLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/extraction_yield_percent"
+        android:layout_margin="@dimen/form_icon_margin_16"/>
+
+    <TextView
+        android:id="@+id/text_extraction_yield"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/form_icon_margin_16"/>
+
+</LinearLayout>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+    android:id="@+id/linear_layout"
+    android:layout_width="match_parent"
+    android:layout_height="75dp"
+    android:orientation="vertical"
+    app:layout_anchor="@id/app_bar_layout"
+    app:layout_anchorGravity="bottom"/>
+
+    <com.github.clans.fab.FloatingActionMenu
+        android:id="@+id/fab_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:visibility="invisible"
+        app:layout_anchor="@id/linear_layout"
+        app:layout_anchorGravity="top"
+        app:menu_colorNormal="@color/accent"
+        app:menu_colorPressed="@color/accent_light"
+        app:menu_colorRipple="@color/accent_lighter"
+        app:menu_labels_ellipsize="end"
+        app:menu_labels_showShadow="false"
+        app:menu_labels_singleLine="true"
+        app:menu_fab_size="normal"
+        app:menu_openDirection="down">
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fab_colorNormal="@color/accent"
+            app:fab_colorPressed="@color/accent_light"
+            app:fab_colorRipple="@color/accent_lighter"
+            app:fab_label="fab1"
+            app:fab_size="mini" />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fab_colorNormal="@color/accent"
+            app:fab_colorPressed="@color/accent_light"
+            app:fab_colorRipple="@color/accent_lighter"
+            app:fab_label="fab2"
+            app:fab_size="mini"/>
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fab_colorNormal="@color/accent"
+            app:fab_colorPressed="@color/accent_light"
+            app:fab_colorRipple="@color/accent_lighter"
+            app:fab_label="fab3"
+            app:fab_size="mini"/>
+
+    </com.github.clans.fab.FloatingActionMenu>
+
+</merge>

@@ -1,0 +1,31 @@
+<resources>
+
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:windowBackground">@color/background</item>
+
+    </style>
+
+    <style name="TabTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent_lighter</item>
+    </style>
+
+    <style name="TutorialTheme" parent="ShowcaseView">
+        <item name="sv_backgroundColor">@color/primaryTrans</item>
+        <item name="sv_showcaseColor">@color/primaryDarkTrans</item>
+        <item name="sv_titleTextAppearance">@style/TutorialTitle</item>
+        <item name="sv_detailTextAppearance">@style/TutorialText</item>
+    </style>
+
+    <style name="TutorialTitle" parent="TextAppearance.ShowcaseView.Title.Light">
+        <item name="android:textColor">@color/tutorialTitle</item>
+    </style>
+
+    <style name="TutorialText" parent="TextAppearance.ShowcaseView.Detail.Light">
+        <item name="android:textColor">@color/tutorialText</item>
+    </style>
+</resources>

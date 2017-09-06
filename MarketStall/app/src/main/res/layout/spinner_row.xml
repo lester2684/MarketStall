@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.mikhaellopez.circularimageview.CircularImageView
+        android:id="@+id/image_view"
+        android:layout_width="@dimen/circular_image_view_size_40"
+        android:layout_height="@dimen/circular_image_view_size_40"
+        android:layout_marginEnd="@dimen/form_icon_margin_16"
+        app:civ_border="false"
+        app:civ_shadow="@bool/circular_image_view_shadow"
+        app:civ_shadow_radius="@integer/circular_image_view_shadow_radius_10"
+        app:civ_shadow_color="@color/shadow"/>
+
+    <TextView
+        android:id="@+id/text_title1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/image_view"
+        android:textColor="@color/black"
+        android:textSize="@dimen/text_size_15"/>
+
+    <TextView
+        android:id="@+id/text_title2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/text_title1"
+        android:layout_toEndOf="@id/image_view"
+        android:textColor="@color/black"
+        android:textSize="@dimen/text_size_12"/>
+
+</RelativeLayout>

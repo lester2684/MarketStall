@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--circular image view-->
+    <integer name="circular_image_view_shadow_radius_10">10</integer>
+    <integer name="circular_image_view_shadow_radius_2">2</integer>
+
+    <!--seek bar-->
+    <integer name="seek_bar_max">10</integer>
+
+    <!--fab-->
+    <integer name="fab_delay">350</integer>
+
+    <!--animation-->
+    <integer name="slide_duration">600</integer>
+    <integer name="fade_duration">600</integer>
+</resources>

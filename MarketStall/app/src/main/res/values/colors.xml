@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="primary">#263238</color>
+    <color name="primary_dark">#000000</color>
+    <color name="accent">#546E7A</color>
+    <color name="accent_light">#607D8B</color>
+    <color name="accent_lighter">#8097A2</color>
+    <color name="background">#e7e7e7</color>
+
+    <color name="primaryTrans">#e5263238</color>
+    <color name="primaryDarkTrans">#e5000000</color>
+
+    <color name="tutorialTitle">#deffffff</color>
+    <color name="tutorialText">#a6ffffff</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="shadow">#000000</color>
+    <color name="transparentDark">#b4000000</color>
+</resources>

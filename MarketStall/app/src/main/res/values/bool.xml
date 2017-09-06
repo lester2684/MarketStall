@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--circular image view-->
+    <bool name="circular_image_view_shadow">true</bool>
+
+</resources>

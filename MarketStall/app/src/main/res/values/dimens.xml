@@ -1,0 +1,51 @@
+<resources>
+
+    <!--nav bar-->
+    <dimen name="nav_header_vertical_spacing">16dp</dimen>
+    <dimen name="nav_header_height">160dp</dimen>
+
+
+    <!--activity-->
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <!--toolbar-->
+    <dimen name="toolbar_expanded_height">200dp</dimen>
+    <dimen name="toolbar_expanded_title_margin_start">48dp</dimen>
+    <dimen name="toolbar_expanded_title_margin_end">64dp</dimen>
+
+    <!--circular image view-->
+    <dimen name="circular_image_view_size_100">100dp</dimen>
+    <dimen name="circular_image_view_size_90">90dp</dimen>
+    <dimen name="circular_image_view_size_40">40dp</dimen>
+    <dimen name="circular_image_view_size_30">30dp</dimen>
+    <dimen name="circular_image_view_border_size">2dp</dimen>
+
+    <!--recycler row-->
+    <dimen name="recycler_row_height">100dp</dimen>
+    <dimen name="recycler_margin_10">10dp</dimen>
+    <dimen name="recycler_margin_5">5dp</dimen>
+
+    <!--text size-->
+    <dimen name="text_size_20">20sp</dimen>
+    <dimen name="text_size_17">17sp</dimen>
+    <dimen name="text_size_15">15sp</dimen>
+    <dimen name="text_size_12">12sp</dimen>
+
+    <!--Flavour chart-->
+    <dimen name="flavour_chart_height_edit">300dp</dimen>
+    <dimen name="flavour_chart_height">400dp</dimen>
+
+    <!--seek bar-->
+    <dimen name="seek_bar_padding">16dp</dimen>
+
+    <!--Form-->
+
+        <!--Icon-->
+            <dimen name="form_icon_size_24">24dp</dimen>
+            <dimen name="form_icon_size_100">100dp</dimen>
+            <dimen name="form_icon_margin_16">16dp</dimen>
+            <dimen name="form_icon_margin_32">32dp</dimen>
+
+    <!--showcase-->
+    <dimen name="showcase_radius_material">80dp</dimen>
+</resources>
