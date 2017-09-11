@@ -1,86 +1,38 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!--App-->
-    <string name="app_name">Coffee Book</string>
+    <string name="app_name">Market Stalls</string>
 
     <!--Navigation drawer-->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <!--Fragment tab titles-->
-    <string name="tab_title_flavour">Flavour</string>
-    <string name="tab_title_details">Details</string>
-    <string name="tab_title_brews">Brews</string>
-    <string name="tab_title_brew_recipes">Brew Recipes</string>
-    <string name="tab_title_coffees">Coffees</string>
-
-    <!--Text input-->
-    <string name="text_roaster">Roaster</string>
-    <string name="text_roast_date">Roast Date</string>
-    <string name="text_brew_date">Brew Date</string>
-    <string name="text_price">Price</string>
-    <string name="text_TDS_percent">TDS - %</string>
-    <string name="text_TDS">TDS</string>
-    <string name="text_name">Name</string>
-    <string name="text_process">Process</string>
-    <string name="text_elevation">Elevation</string>
-    <string name="text_variety">Variety</string>
-    <string name="text_farm">Farm</string>
+    <string name="tab_title_items">Items</string>
     <string name="text_location">Location</string>
 
-    <string name="brew_type">Brew Type</string>
-    <string name="water_temp">Water Temperature</string>
-    <string name="water_weight">Water Weight</string>
-    <string name="ratio">Ratio</string>
-    <string name="bloom_time">Bloom Time</string>
 
     <string name="change_image">Click to set the image</string>
-    <string name="add_coffee">Add a coffee first</string>
-    <string name="no_coffee_error">You need to add a coffee to save the brew</string>
-    <string name="unknown_roaster">Unknown Roaster</string>
     <string name="settings">Settings</string>
     <string name="tools">Tools</string>
     <string name="reset_tutorial">Reset Tutorial</string>
-    <string name="extraction_yield_calculate">Extraction Yield Calculate</string>
-    <string name="brew_yield">Brew yield - g</string>
-    <string name="coffee_dose">Coffee dose - g</string>
-    <string name="extraction_yield_percent">Extraction Yield - %</string>
-    <string name="extraction_yield">Extraction Yield</string>
-    <string name="add_coffee_message" tools:ignore="TypographyEllipsis">Try adding a coffee...</string>
-    <string name="add_brew_message" tools:ignore="TypographyEllipsis">Try adding a brew...</string>
-    <string name="add_brew_recipe_message" tools:ignore="TypographyEllipsis">Try adding a brew recipe...</string>
+    <string name="add_item_message" tools:ignore="TypographyEllipsis">Try adding a item...</string>
 
     <!--Text input error-->
-    <string name="text_error_name_coffee">Enter a roaster name</string>
-    <string name="text_error_name_brew">Enter a brew name</string>
+    <string name="text_error_name_item">Enter the item name</string>
 
     <!--Text view-->
     <string name="brews">Brews</string>
+    <string name="text_name">Name</string>
+    <string name="text_date">Date</string>
+    <string name="text_price">Price</string>
 
     <!--Button texts-->
     <string name="button_delete">Delete</string>
     <string name="button_edit">Edit</string>
-    <string name="button_coffee">Coffee</string>
-    <string name="button_brew_recipe">Brew Recipes</string>
-    <string name="button_brew">Brew</string>
+    <string name="button_item">Item</string>
     <string name="button_add_info">Add More Information</string>
 
     <!--Path to saved photos-->
     <string name="photos_folders">/coffee_book/images</string>
 
-    <!--Brew Types-->
-
-    <string name="brew_type_turkish">Turkish</string>
-    <string name="brew_type_cupping">Cupping</string>
-    <string name="brew_type_cold_brew">Cold Brew</string>
-    <string name="brew_type_plunger">Plunger</string>
-    <string name="brew_type_chemex">Chemex</string>
-    <string name="brew_type_pour_over">PourOver</string>
-    <string name="brew_type_batch_brew">Batch Brew</string>
-    <string name="brew_type_espresso">Espresso</string>
-    <string name="brew_type_siphon">Siphon</string>
-    <string name="brew_type_aeropress">Aeropress</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

@@ -1,11 +1,11 @@
 package com.example.mrl.marketstall.interfaces;
 
-import com.example.mrl.marketstall.model.Brew;
+import com.example.mrl.marketstall.model.Item;
 
 public interface CallbacksTabEdit
 {
     void save();
     void delete();
-    void setBrew(Brew brew);
-    Brew getBrew();
+    void setItem(Item item);
+    Item getItem();
 }

@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "56476446881",
+    "firebase_url": "https://market-stall.firebaseio.com",
+    "project_id": "market-stall",
+    "storage_bucket": "market-stall.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:56476446881:android:aa1d32a97c10c843",
+        "android_client_info": {
+          "package_name": "com.example.mrl.marketstall"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "56476446881-jfc3inhk2t7tvgo4reksnu9um7oi987d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.mrl.marketstall",
+            "certificate_hash": "5c4cd34e643e3c332717d36e5da58990a017d41d"
+          }
+        },
+        {
+          "client_id": "56476446881-ijjs2v2n8gq5f3ua94m9gaokujhvmpl8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzbjupxeCaO_LLb6p0QRZ99W3njz3AofI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "56476446881-ijjs2v2n8gq5f3ua94m9gaokujhvmpl8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -5,11 +5,6 @@
 
         <menu>
 
-            <item
-                android:id="@+id/nav_extraction_yield_cal"
-                android:icon="@drawable/button"
-                android:title="@string/extraction_yield_calculate" />
-
         </menu>
 
     </item>
@@ -18,10 +13,6 @@
 
         <menu>
 
-            <item
-                android:id="@+id/nav_reset_tutorial"
-                android:icon="@android:drawable/ic_menu_revert"
-                android:title="@string/reset_tutorial" />
         </menu>
 
     </item>

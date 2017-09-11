@@ -235,7 +235,10 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
+        switch (id)
+        {
 
+        }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         assert drawer != null;
         drawer.closeDrawer(GravityCompat.START);

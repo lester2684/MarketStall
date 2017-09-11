@@ -1,7 +1,6 @@
 package com.example.mrl.marketstall.utils;
 
 import android.app.Activity;
-import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,8 +10,6 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import com.example.mrl.marketstall.R;
-import com.example.mrl.marketstall.model.Brew;
-import com.example.mrl.marketstall.model.Coffee;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -99,19 +96,19 @@ public class ImageUtils
         return path;
     }
 
-    public static Uri getCoffeePhotoUri(Context context, Coffee coffee)
-    {
-        File sd = Environment.getExternalStorageDirectory();
-        File destination = new File(sd, context.getString(R.string.photos_folders));
-        File photo = new File(destination, FORWARD_SLASH + coffee.getImageName());
-        return Uri.fromFile(photo);
-    }
-
-    public static Uri getBrewPhotoUri(Context context, Brew brew)
-    {
-        File sd = Environment.getExternalStorageDirectory();
-        File destination = new File(sd, context.getString(R.string.photos_folders));
-        File photo = new File(destination, FORWARD_SLASH + brew.getImageName());
-        return Uri.fromFile(photo);
-    }
+//    public static Uri getCoffeePhotoUri(Context context, Coffee coffee)
+//    {
+//        File sd = Environment.getExternalStorageDirectory();
+//        File destination = new File(sd, context.getString(R.string.photos_folders));
+//        File photo = new File(destination, FORWARD_SLASH + coffee.getImageName());
+//        return Uri.fromFile(photo);
+//    }
+//
+//    public static Uri getBrewPhotoUri(Context context, Brew brew)
+//    {
+//        File sd = Environment.getExternalStorageDirectory();
+//        File destination = new File(sd, context.getString(R.string.photos_folders));
+//        File photo = new File(destination, FORWARD_SLASH + brew.getImageName());
+//        return Uri.fromFile(photo);
+//    }
 }

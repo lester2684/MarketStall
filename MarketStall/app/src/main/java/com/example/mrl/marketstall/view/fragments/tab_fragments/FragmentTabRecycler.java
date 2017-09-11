@@ -1,7 +1,6 @@
 package com.example.mrl.marketstall.view.fragments.tab_fragments;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.AppBarLayout;
@@ -17,24 +16,25 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.example.mrl.marketstall.R;
 import com.example.mrl.marketstall.adapter.RecyclerGenericAdapter;
 import com.example.mrl.marketstall.interfaces.Callbacks;
-import com.example.mrl.marketstall.model.Brew;
-import com.example.mrl.marketstall.model.BrewRecipe;
-import com.example.mrl.marketstall.model.Coffee;
+import com.example.mrl.marketstall.model.Item;
 import com.example.mrl.marketstall.ui.Animations;
 import com.example.mrl.marketstall.ui.DividerItemDecoration;
-import com.example.mrl.marketstall.utils.ImageUtils;
 import com.example.mrl.marketstall.value.Values;
-import com.example.mrl.marketstall.view.fragments.FragmentDetails;
 import com.example.mrl.marketstall.view.fragments.FragmentForm;
 import com.example.mrl.marketstall.view.fragments.FragmentTabHost;
 import com.example.mrl.marketstall.viewholder.RecyclerViewHolder;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.mrl.marketstall.R.id.fab_menu;
@@ -44,20 +44,15 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
     private final String TAG = getClass().getSimpleName();
     private View view;
     private FloatingActionMenu fabMenu;
-    private FloatingActionButton fabBrewRecipe;
-    private FloatingActionButton fabCoffee;
-    private FloatingActionButton fabBrew;
+    private FloatingActionButton fabAddItem;
+    private FloatingActionButton fab2;
+    private FloatingActionButton fab1;
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
-    private RecyclerGenericAdapter<Coffee> coffeeRecyclerGenericAdapter;
-    private RecyclerGenericAdapter<Brew> brewRecyclerGenericAdapter;
-    private RecyclerGenericAdapter<BrewRecipe> brewRecipeRecyclerGenericAdapter;
-//    private DataSourceCoffee dataSourceCoffee;
-//    private DataSourceBrew dataSourceBrew;
-//    private DataSourceBrewRecipe dataSourceBrewRecipe;
-    private List<Coffee> coffees;
-    private List<Brew> brews;
-    private List<BrewRecipe> brewRecipes;
+    private RecyclerGenericAdapter<Item> itemRecyclerGenericAdapter;
+    private DatabaseReference mDatabase;
+    private DatabaseReference itemCloudEndPoint;
+    private List<Item> items;
     private String recyclerType;
     private String tabType;
 
@@ -72,8 +67,6 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
         setupToolbar();
         setupFAB();
         setupSwipeRefreshLayout();
-        setupRecyclerView();
-        updateCoffeeList();
 
         return view;
     }
@@ -81,25 +74,34 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
     private void setupValues()
     {
         fabMenu = (FloatingActionMenu) getActivity().findViewById(fab_menu);
-        fabBrewRecipe = (FloatingActionButton) getActivity().findViewById(R.id.fab2);
-        fabCoffee = (FloatingActionButton) getActivity().findViewById(R.id.fab3);
-        fabBrew = (FloatingActionButton) getActivity().findViewById(R.id.fab1);
+        fabAddItem = (FloatingActionButton) getActivity().findViewById(R.id.fab3);
+        fab2 = (FloatingActionButton) getActivity().findViewById(R.id.fab2);
+        fab1 = (FloatingActionButton) getActivity().findViewById(R.id.fab1);
+
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
 
         recyclerType = getArguments().getString(Values.RECYCLER_TYPE);
         tabType = getArguments().getString(Values.TAB_TYPE);
 
-//        dataSourceCoffee = new DataSourceCoffee(getContext());
-//        dataSourceBrew = new DataSourceBrew(getContext());
-//        dataSourceBrewRecipe = new DataSourceBrewRecipe(getContext());
-//        dataSourceCoffee.open();
-//        dataSourceBrew.open();
-//        dataSourceBrewRecipe.open();
-//
-//        brews = dataSourceBrew.getAll();
-//        coffees = dataSourceCoffee.getAll();
-//        brewRecipes = dataSourceBrewRecipe.getAll();
+        items = new ArrayList<>();
+        mDatabase =  FirebaseDatabase.getInstance().getReference();
+        itemCloudEndPoint = mDatabase.child("items");
+        itemCloudEndPoint.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot itemSnapshot: dataSnapshot.getChildren()){
+                    Item item = itemSnapshot.getValue(Item.class);
+                    items.add(item);
+                }
+                setupRecyclerView();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG, databaseError.getMessage());
+            }
+        });
     }
 
     private void setupToolbar()
@@ -155,7 +157,7 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
             @Override
             public void onRefresh()
             {
-                updateCoffeeList();
+                updateList();
             }
         });
         swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright,
@@ -169,17 +171,17 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
         TextView blankMessage = (TextView) view.findViewById(R.id.blank_message);
         switch (recyclerType)
         {
-            case Values.BREW:
-                if (brews.size() == 0)
+            case Values.ITEM:
+                if (items.size() == 0)
                 {
-                    blankMessage.setText(getString(R.string.add_brew_message));
+                    blankMessage.setText(getString(R.string.add_item_message));
                     blankMessage.setVisibility(View.VISIBLE);
                 }
                 else
                 {
                     blankMessage.setVisibility(View.GONE);
                 }
-                brewRecyclerGenericAdapter = new RecyclerGenericAdapter<Brew>(getActivity(), brews)
+                itemRecyclerGenericAdapter = new RecyclerGenericAdapter<Item>(getActivity(), items)
                 {
                     @Override
                     public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, int viewType, OnRecyclerItemClicked onRecyclerItemClicked)
@@ -190,18 +192,18 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
                     }
 
                     @Override
-                    public void onBindData(Context context, RecyclerView.ViewHolder holder, Brew item, int position)
+                    public void onBindData(Context context, RecyclerView.ViewHolder holder, Item item, int position)
                     {
                         RecyclerViewHolder recyclerViewHolder = (RecyclerViewHolder) holder;
                         recyclerViewHolder.title1.setText(item.getName());
-                        recyclerViewHolder.title2.setText(getString(R.string.text_brew_date) + ": " + item.getBrewDate());
+                        recyclerViewHolder.title2.setText(getString(R.string.text_date) + ": " + item.getDateCreated());
 
-                        Glide
-                                .with(context)
-                                .load(ImageUtils.getBrewPhotoUri(context,item))
-                                .error(R.raw.photo_coffee_cup)
-                                .crossFade()
-                                .into(recyclerViewHolder.circularImageView);
+//                        Glide
+//                                .with(context)
+//                                .load(ImageUtils.getBrewPhotoUri(context,item))
+//                                .error(R.raw.photo_coffee_cup)
+//                                .crossFade()
+//                                .into(recyclerViewHolder.circularImageView);
                     }
 
                     @Override
@@ -216,119 +218,7 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
                         };
                     }
                 };
-                recyclerView.setAdapter(brewRecyclerGenericAdapter);
-                break;
-            case Values.COFFEE:
-                if (coffees.size() == 0)
-                {
-                    blankMessage.setText(getString(R.string.add_coffee_message));
-                    blankMessage.setVisibility(View.VISIBLE);
-                }
-                else
-                {
-                    blankMessage.setVisibility(View.GONE);
-                }
-                coffeeRecyclerGenericAdapter = new RecyclerGenericAdapter<Coffee>(getActivity() , coffees)
-                {
-                    @Override
-                    public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, int viewType, OnRecyclerItemClicked onRecyclerItemClicked)
-                    {
-                        final View view = LayoutInflater.from(getActivity()).inflate(R.layout.recycler_row, parent, false);
-                        return new RecyclerViewHolder(view, onRecyclerItemClicked);
-                    }
-
-                    @Override
-                    public void onBindData(Context context, RecyclerView.ViewHolder holder, Coffee item, int position)
-                    {
-                        RecyclerViewHolder recyclerViewHolder = (RecyclerViewHolder) holder;
-                        recyclerViewHolder.title1.setText(item.getName());
-                        if (!item.getLocation().trim().isEmpty())
-                        {
-                            recyclerViewHolder.title2.setText(item.getLocation());
-                        }
-                        if (!item.getRoastDate().trim().isEmpty() && !item.getRoaster().trim().isEmpty())
-                        {
-                            recyclerViewHolder.title3.setText(item.getRoaster() + ": " + item.getRoastDate());
-                        }
-                        else if (!item.getRoastDate().trim().isEmpty() && item.getRoaster().trim().isEmpty())
-                        {
-                            recyclerViewHolder.title3.setText( getString(R.string.unknown_roaster) + ": " + item.getRoastDate());
-                        }
-                        else if (item.getRoastDate().trim().isEmpty() && !item.getRoaster().trim().isEmpty())
-                        {
-                            recyclerViewHolder.title3.setText(item.getRoaster());
-                        }
-                        else if (item.getRoastDate().trim().isEmpty() && item.getRoaster().trim().isEmpty())
-                        {
-                            recyclerViewHolder.title3.setText(getString(R.string.unknown_roaster));
-                        }
-                        Glide
-                                .with(getContext())
-                                .load(ImageUtils.getCoffeePhotoUri(context, item))
-                                .error(R.raw.photo_coffee_beans)
-                                .crossFade()
-                                .into(recyclerViewHolder.circularImageView);
-                    }
-
-                    @Override
-                    public OnRecyclerItemClicked onGetRecyclerItemClickListener()
-                    {
-                        return new OnRecyclerItemClicked()
-                        {
-                            @Override
-                            public void onItemClicked(View view, int position)
-                            {
-                                toSelected(position);
-                            }
-                        };
-                    }
-                };
-                recyclerView.setAdapter(coffeeRecyclerGenericAdapter);
-                break;
-            case Values.BREW_RECIPE:
-                if (brewRecipes.size() == 0)
-                {
-                    blankMessage.setText(getString(R.string.add_brew_recipe_message));
-                    blankMessage.setVisibility(View.VISIBLE);
-                }
-                else
-                {
-                    blankMessage.setVisibility(View.GONE);
-                }
-                brewRecipeRecyclerGenericAdapter = new RecyclerGenericAdapter<BrewRecipe>(getActivity() , brewRecipes)
-                {
-                    @Override
-                    public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, int viewType, OnRecyclerItemClicked onRecyclerItemClicked)
-                    {
-                        final View view = LayoutInflater.from(getActivity()).inflate(R.layout.recycler_row, parent, false);
-                        return new RecyclerViewHolder(view, onRecyclerItemClicked);
-                    }
-
-                    @Override
-                    public void onBindData(Context context, RecyclerView.ViewHolder holder, BrewRecipe item, int position)
-                    {
-                        RecyclerViewHolder recyclerViewHolder = (RecyclerViewHolder) holder;
-                        recyclerViewHolder.title1.setText(item.getId() +"");
-                        Glide
-                                .with(getContext())
-                                .load(R.raw.photo_coffee_beans)
-                                .into(recyclerViewHolder.circularImageView);
-                    }
-
-                    @Override
-                    public OnRecyclerItemClicked onGetRecyclerItemClickListener()
-                    {
-                        return new OnRecyclerItemClicked()
-                        {
-                            @Override
-                            public void onItemClicked(View view, int position)
-                            {
-                                toSelected(position);
-                            }
-                        };
-                    }
-                };
-                recyclerView.setAdapter(brewRecipeRecyclerGenericAdapter);
+                recyclerView.setAdapter(itemRecyclerGenericAdapter);
                 break;
         }
         recyclerView.setHasFixedSize(true);
@@ -339,39 +229,17 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
 
     private void setFAB()
     {
-        fabBrew.setVisibility(View.INVISIBLE);
-        fabBrew.setLabelText(getString(R.string.button_brew));
-        fabBrew.setImageDrawable(getResources().getDrawable(R.drawable.button, getActivity().getTheme()));
-        fabBrew.setOnClickListener(new View.OnClickListener()
+        fabAddItem.setVisibility(View.INVISIBLE);
+        fab2.setVisibility(View.GONE);
+        fab1.setVisibility(View.GONE);
+        fabAddItem.setLabelText(getString(R.string.button_item));
+        fabAddItem.setImageDrawable(getResources().getDrawable(R.drawable.fab_add, getActivity().getTheme()));
+        fabAddItem.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                addBrew();
-            }
-        });
-
-        fabBrewRecipe.setVisibility(View.INVISIBLE);
-        fabBrewRecipe.setLabelText(getString(R.string.button_brew_recipe));
-        fabBrewRecipe.setImageDrawable(getResources().getDrawable(R.drawable.button, getActivity().getTheme()));
-        fabBrewRecipe.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                addBrewRecipe();
-            }
-        });
-
-        fabCoffee.setVisibility(View.INVISIBLE);
-        fabCoffee.setLabelText(getString(R.string.button_coffee));
-        fabCoffee.setImageDrawable(getResources().getDrawable(R.drawable.button, getActivity().getTheme()));
-        fabCoffee.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                addCoffee();
+                addItem();
             }
         });
 
@@ -399,24 +267,12 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
         }
     }
 
-    private void updateCoffeeList()
+    private void updateList()
     {
-//        brews = dataSourceBrew.getAll();
-//        coffees = dataSourceCoffee.getAll();
-//        brewRecipes = dataSourceBrewRecipe.getAll();
         switch (recyclerType)
         {
-            case Values.BREW:
-                brewRecyclerGenericAdapter.clear();
-                brewRecyclerGenericAdapter.addAll(brews);
-                break;
-            case Values.COFFEE:
-                coffeeRecyclerGenericAdapter.clear();
-                coffeeRecyclerGenericAdapter.addAll(coffees);
-                break;
-            case Values.BREW_RECIPE:
-                brewRecipeRecyclerGenericAdapter.clear();
-                brewRecipeRecyclerGenericAdapter.addAll(brewRecipes);
+            case Values.ITEM:
+                itemRecyclerGenericAdapter.setItems(items);
                 break;
         }
         swipeRefreshLayout.setRefreshing(false);
@@ -428,12 +284,11 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
         Bundle bundle = new Bundle();
         switch (recyclerType)
         {
-            case Values.BREW:
-                Uri brewPhotoUri = ImageUtils.getBrewPhotoUri(getContext(), brews.get(position));
-                Animations.toolbarAnimation(getActivity(), R.anim.slide_left_out, R.anim.slide_right_in, brewPhotoUri.getPath(), R.raw.photo_pour_over);
-                bundle.putInt(Values.SELECTED_BREW, brews.get(position).getId());
+            case Values.ITEM:
+                Animations.toolbarAnimation(getActivity(), R.anim.slide_left_out, R.anim.slide_right_in, R.raw.photo_pour_over, R.raw.photo_pour_over);
+                bundle.putString(Values.SELECTED_ITEM, items.get(position).getId());
                 bundle.putBoolean(Values.EDIT_VALUE, true);
-                bundle.putString(Values.TAB_TYPE, Values.TAB_BREW_DETAILS);
+                bundle.putString(Values.TAB_TYPE, Values.TAB_ITEM_DETAILS);
                 FragmentTabHost fragmentTabHost = new FragmentTabHost();
                 fragmentTabHost.setArguments(bundle);
                 getActivity()
@@ -444,82 +299,15 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
                         .addToBackStack(fragmentTabHost.getTag())
                         .commit();
                 break;
-            case Values.COFFEE:
-                Uri coffeePhotoUri = ImageUtils.getCoffeePhotoUri(getContext(), coffees.get(position));
-                Animations.toolbarAnimation(getActivity(), R.anim.slide_left_out, R.anim.slide_right_in, coffeePhotoUri.getPath(), R.raw.photo_coffee_beans);
-                bundle.putString(Values.DETAILS_TYPE, Values.COFFEE);
-                bundle.putInt(Values.SELECTED_COFFEE, coffees.get(position).getId());
-                FragmentDetails fragmentDetailsCoffee = new FragmentDetails();
-                fragmentDetailsCoffee.setArguments(bundle);
-                getActivity()
-                        .getSupportFragmentManager()
-                        .beginTransaction()
-                        .setCustomAnimations(R.anim.slide_right_in, R.anim.slide_left_out, R.anim.slide_left_in, R.anim.slide_right_out)
-                        .replace(R.id.fragment_container_main, fragmentDetailsCoffee, fragmentDetailsCoffee.getTAG())
-                        .addToBackStack(fragmentDetailsCoffee.getTag())
-                        .commit();
-                break;
-            case Values.BREW_RECIPE:
-                Animations.toolbarAnimation(getActivity(), R.anim.slide_left_out, R.anim.slide_right_in, R.raw.photo_coffee_cup, R.raw.photo_coffee_beans);
-                bundle.putString(Values.DETAILS_TYPE, Values.BREW_RECIPE);
-                bundle.putInt(Values.SELECTED_BREW_RECIPE, brewRecipes.get(position).getId());
-                FragmentDetails fragmentDetailsBrewRecipe = new FragmentDetails();
-                fragmentDetailsBrewRecipe.setArguments(bundle);
-                getActivity()
-                        .getSupportFragmentManager()
-                        .beginTransaction()
-                        .setCustomAnimations(R.anim.slide_right_in, R.anim.slide_left_out, R.anim.slide_left_in, R.anim.slide_right_out)
-                        .replace(R.id.fragment_container_main, fragmentDetailsBrewRecipe, fragmentDetailsBrewRecipe.getTAG())
-                        .addToBackStack(fragmentDetailsBrewRecipe.getTag())
-                        .commit();
-                break;
         }
     }
 
-    private void addCoffee()
+    private void addItem()
     {
-        Log.i(TAG, "addCoffee: ");
-        Animations.toolbarAnimation(getActivity(), R.anim.fade_out, R.anim.fade_in, R.raw.photo_coffee_beans, R.raw.photo_coffee_beans);
-        Bundle bundle = new Bundle();
-        bundle.putString(Values.FORM_TYPE, Values.COFFEE);
-        bundle.putBoolean(Values.EDIT_VALUE, false);
-        FragmentForm fragment = new FragmentForm();
-        fragment.setArguments(bundle);
-        getActivity()
-                .getSupportFragmentManager()
-                .beginTransaction()
-                .setCustomAnimations(R.anim.slide_up_in, R.anim.slide_down_out, R.anim.slide_up_in, R.anim.slide_down_out)
-                .replace(R.id.fragment_container_main, fragment, fragment.getTAG())
-                .addToBackStack(fragment.getTAG())
-                .commit();
-    }
-
-    private void addBrew()
-    {
-        Log.i(TAG, "addBrew: ");
+        Log.i(TAG, "addItem: ");
         Animations.toolbarAnimation(getActivity(), R.anim.fade_out, R.anim.fade_in, R.raw.photo_pour_over, R.raw.photo_pour_over);
         Bundle bundle = new Bundle();
-        bundle.putInt(Values.SELECTED_COFFEE, 1);
-        bundle.putBoolean(Values.EDIT_VALUE, false);
-        bundle.putString(Values.TAB_TYPE, Values.TAB_BREW_NEW);
-        FragmentTabHost fragment = new FragmentTabHost();
-        fragment.setArguments(bundle);
-        getActivity()
-                .getSupportFragmentManager()
-                .beginTransaction()
-                .setCustomAnimations(R.anim.slide_up_in, R.anim.slide_down_out, R.anim.slide_up_in, R.anim.slide_down_out)
-                .replace(R.id.fragment_container_main, fragment, fragment.getTAG())
-                .addToBackStack(fragment.getTAG())
-                .commit();
-    }
-
-    private void addBrewRecipe()
-    {
-        Log.i(TAG, "addBrewRecipe: ");
-        Animations.toolbarAnimation(getActivity(), R.anim.fade_out, R.anim.fade_in, R.raw.photo_pour_over, R.raw.photo_pour_over);
-        Bundle bundle = new Bundle();
-        bundle.putString(Values.FORM_TYPE, Values.BREW_RECIPE);
-        bundle.putInt(Values.SELECTED_BREW_RECIPE, 1);
+        bundle.putString(Values.FORM_TYPE, Values.ITEM);
         bundle.putBoolean(Values.EDIT_VALUE, false);
         FragmentForm fragment = new FragmentForm();
         fragment.setArguments(bundle);
@@ -578,10 +366,6 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
     {
         Log.i(TAG, "onResume: ");
         super.onResume();
-//        dataSourceCoffee.open();
-//        dataSourceBrew.open();
-//        dataSourceBrewRecipe.open();
-        updateCoffeeList();
     }
 
     @Override
@@ -593,9 +377,6 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
         {
             fabMenu.close(true);
         }
-//        dataSourceCoffee.close();
-//        dataSourceBrew.close();
-//        dataSourceBrewRecipe.close();
     }
 
     @Override

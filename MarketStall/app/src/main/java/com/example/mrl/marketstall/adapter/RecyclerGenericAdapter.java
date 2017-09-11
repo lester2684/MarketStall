@@ -5,7 +5,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class RecyclerGenericAdapter<T> extends RecyclerView.Adapter<RecyclerView.ViewHolder>
@@ -54,16 +53,19 @@ public abstract class RecyclerGenericAdapter<T> extends RecyclerView.Adapter<Rec
         notifyDataSetChanged();
     }
 
-    public void addAll(List<T> list)
-    {
-        this.items.addAll(list);
-        notifyDataSetChanged();
+    public void addAll(List<T> list) {
+        if (!this.items.containsAll(list)) {
+            this.items.addAll(list);
+            notifyDataSetChanged();
+        }
     }
 
-    public void setItems( ArrayList<T> savedCardItems)
+    public void setItems(List<T> list)
     {
-        items = savedCardItems;
-        this.notifyDataSetChanged();
+        if (!this.items.containsAll(list)) {
+            items = list;
+            this.notifyDataSetChanged();
+        }
     }
 
     public T getItem(int position)
