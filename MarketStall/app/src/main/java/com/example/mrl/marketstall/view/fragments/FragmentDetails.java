@@ -39,6 +39,7 @@ public class FragmentDetails extends Fragment implements Callbacks
     private final String TAG = getClass().getSimpleName();
     private View view;
     private Toolbar toolbar;
+    private CollapsingToolbarLayout collapsingToolbarLayout;
     private FloatingActionMenu fabMenu;
     private FloatingActionButton fabEdit;
     private FloatingActionButton fabDelete;
@@ -61,8 +62,6 @@ public class FragmentDetails extends Fragment implements Callbacks
         setupValues();
         setupToolbar();
         setupFAB();
-        setupView();
-        setupRecyclerViewDetails();
 
         return view;
     }
@@ -70,6 +69,7 @@ public class FragmentDetails extends Fragment implements Callbacks
     private void setupValues()
     {
         toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+        collapsingToolbarLayout = (CollapsingToolbarLayout) getActivity().findViewById(R.id.collapsing_toolbar_layout);
         fabMenu = (FloatingActionMenu) getActivity().findViewById(R.id.fab_menu);
         fabEdit = (FloatingActionButton) getActivity().findViewById(R.id.fab2);
         fabDelete = (FloatingActionButton) getActivity().findViewById(R.id.fab3);
@@ -83,8 +83,12 @@ public class FragmentDetails extends Fragment implements Callbacks
         itemCloudEndPoint.child(getArguments().getString(Values.SELECTED_ITEM)).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot noteSnapshot: dataSnapshot.getChildren()){
-                    item = noteSnapshot.getValue(Item.class);
+                if (dataSnapshot.exists()) {
+                    item = dataSnapshot.getValue(Item.class);
+                    updateListDetails();
+                    collapsingToolbarLayout.setTitle(item.getName());
+                    setupView();
+                    setupRecyclerViewDetails();
                 }
             }
 
@@ -93,22 +97,12 @@ public class FragmentDetails extends Fragment implements Callbacks
                 Log.d(TAG, databaseError.getMessage());
             }
         });
-
-        detailsList = new ArrayList<>();
     }
 
     private void setupToolbar()
     {
         AppBarLayout appBarLayout = (AppBarLayout) getActivity().findViewById(R.id.app_bar_layout);
         appBarLayout.setExpanded(true);
-        CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout) getActivity().findViewById(R.id.collapsing_toolbar_layout);
-
-        switch (detailsType)
-        {
-            case Values.ITEM:
-                collapsingToolbarLayout.setTitle(item.getName());
-                break;
-        }
         toolbar.getMenu().clear();
     }
 
@@ -155,7 +149,7 @@ public class FragmentDetails extends Fragment implements Callbacks
         switch (detailsType)
         {
             case Values.ITEM:
-                total_form_size = item.getTOTAL_FORM_SIZE() - 1;
+                total_form_size = item.getTOTAL_FORM_SIZE();
                 break;
         }
         if (detailsList.size() < total_form_size )
@@ -174,8 +168,7 @@ public class FragmentDetails extends Fragment implements Callbacks
 
     private void setupRecyclerViewDetails()
     {
-        List<FormInfo> list = detailsList.subList(1, detailsList.size());
-        detailsInfoRecyclerAdapter = new RecyclerGenericAdapter<FormInfo>(getActivity() , list)
+        detailsInfoRecyclerAdapter = new RecyclerGenericAdapter<FormInfo>(getActivity() , detailsList)
         {
             @Override
             public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, int viewType, OnRecyclerItemClicked onRecyclerItemClicked)
@@ -219,7 +212,7 @@ public class FragmentDetails extends Fragment implements Callbacks
     private void setFAB()
     {
         fabEdit.setVisibility(View.INVISIBLE);
-        fabEdit.setImageDrawable(getResources().getDrawable(R.drawable.button, getActivity().getTheme()));
+        fabEdit.setImageDrawable(getResources().getDrawable(R.drawable.ic_edit, getActivity().getTheme()));
         fabEdit.setLabelText(getString(R.string.button_edit));
         fabEdit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -230,7 +223,7 @@ public class FragmentDetails extends Fragment implements Callbacks
         });
 
         fabDelete.setVisibility(View.INVISIBLE);
-        fabDelete.setImageDrawable(getResources().getDrawable(R.drawable.button, getActivity().getTheme()));
+        fabDelete.setImageDrawable(getResources().getDrawable(R.drawable.ic_delete, getActivity().getTheme()));
         fabDelete.setLabelText(getString(R.string.button_delete));
         fabDelete.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -264,14 +257,15 @@ public class FragmentDetails extends Fragment implements Callbacks
         }
     }
 
-    private void updateList()
+    private void updateListDetails()
     {
-        detailsList = new ArrayList<>();
         List<FormInfo> formInfos = new ArrayList<>();
+        detailsList = new ArrayList<>();
         switch (detailsType)
         {
             case Values.ITEM:
                 formInfos = item.getDetails();
+                formInfos = formInfos.subList(1, formInfos.size());
                 break;
         }
         for (int i = 0; i < formInfos.size(); i++)
@@ -283,27 +277,14 @@ public class FragmentDetails extends Fragment implements Callbacks
         }
     }
 
-    private void updateListAdapters()
-    {
-        updateList();
-        if (detailsList.size() > 0)
-        {
-            detailsInfoRecyclerAdapter.clear();
-            List<FormInfo> list = detailsList.subList(1, detailsList.size());
-            detailsInfoRecyclerAdapter.addAll(list);
-        }
-    }
-
     private void delete()
     {
         Log.i(TAG, "delete: ");
-
         switch (detailsType)
         {
             case Values.ITEM:
 //                ImageUtils.deleteImage(getActivity(), coffee.getImageName());
-                itemCloudEndPoint.child(item.getId()).removeValue();
-                break;
+                itemCloudEndPoint.child(item.getId()).setValue(null);
         }
         backPress();
     }
@@ -318,14 +299,14 @@ public class FragmentDetails extends Fragment implements Callbacks
                 bundle.putString(Values.FORM_TYPE, Values.ITEM);
                 bundle.putString(Values.SELECTED_ITEM, item.getId());
                 bundle.putBoolean(Values.EDIT_VALUE, true);
-                FragmentForm fragmentCoffeeForm = new FragmentForm();
-                fragmentCoffeeForm.setArguments(bundle);
+                FragmentForm fragmentForm = new FragmentForm();
+                fragmentForm.setArguments(bundle);
                 getActivity()
                         .getSupportFragmentManager()
                         .beginTransaction()
                         .setCustomAnimations(R.anim.slide_up_in, R.anim.slide_down_out, R.anim.slide_up_in, R.anim.slide_down_out)
-                        .replace(R.id.fragment_container_main, fragmentCoffeeForm, fragmentCoffeeForm.getTAG())
-                        .addToBackStack(fragmentCoffeeForm.getTag())
+                        .replace(R.id.fragment_container_main, fragmentForm, fragmentForm.getTAG())
+                        .addToBackStack(fragmentForm.getTag())
                         .commit();
                 break;
         }
@@ -361,7 +342,6 @@ public class FragmentDetails extends Fragment implements Callbacks
     {
         Log.i(TAG, "onResume: ");
         super.onResume();
-        updateListAdapters();
     }
 
     @Override

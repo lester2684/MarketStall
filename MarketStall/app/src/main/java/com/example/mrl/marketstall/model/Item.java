@@ -14,6 +14,7 @@ public class Item
     private double price;
     private String userId;
     private String dateCreated;
+    private String location;
 
     private int TOTAL_FORM_SIZE;
 
@@ -22,28 +23,21 @@ public class Item
 
     }
 
-    public Item(String id, String name, double price)
-    {
-        this.id = id;
-        this.name = name;
-        this.price = price;
-    }
-
     public List<FormInfo> getDetails()
     {
         List<FormInfo> details = new ArrayList<>();
         details.add(0, new FormInfo(name, R.raw.icon_name, R.string.text_name));
         details.add(1, new FormInfo(dateCreated, R.drawable.ic_date, R.string.text_date));
         details.add(2, new FormInfo(String.valueOf(price), R.raw.icon_price, R.string.text_price));
-        TOTAL_FORM_SIZE = details.size();
+        details.add(3, new FormInfo(String.valueOf(location), R.drawable.ic_location, R.string.text_location));
+        TOTAL_FORM_SIZE = details.size() -3;
         return details;
     }
 
     public void setByList(List<FormInfo> list)
     {
         this.name = list.get(0).getText();
-        this.dateCreated = list.get(1).getText();
-        this.price = Double.parseDouble(list.get(2).getText());
+        this.price = Double.parseDouble(list.get(1).getText());
     }
 
     public String getId() {

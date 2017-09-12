@@ -1,7 +1,6 @@
 package com.example.mrl.marketstall.view.fragments;
 
 import android.app.Activity;
-import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -32,7 +31,6 @@ import com.example.mrl.marketstall.interfaces.Callbacks;
 import com.example.mrl.marketstall.interfaces.CallbacksTabEdit;
 import com.example.mrl.marketstall.model.FormInfo;
 import com.example.mrl.marketstall.model.Item;
-import com.example.mrl.marketstall.ui.Animations;
 import com.example.mrl.marketstall.utils.Utils;
 import com.example.mrl.marketstall.value.Values;
 import com.example.mrl.marketstall.viewholder.RecyclerViewHolderForm;
@@ -43,6 +41,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -61,14 +61,11 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
     private DatabaseReference mDatabase;
     private DatabaseReference itemCloudEndPoint;
     private Item item;
-    private Calendar calendar;
     private String tabType;
     private Boolean editValue = false;
     private Uri imageURI;
     private boolean imageBoolean = false;
     private boolean showMenu = false;
-    private DatePickerDialog datePickerDialog;
-    private int datePosition = 0;
     private List<FormInfo> formList;
     private String formType;
     private boolean imageSelected = false;
@@ -82,7 +79,6 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
         setupValues();
         setupToolbar();
         setupFAB();
-        setupRecyclerViewForm();
 
         return view;
     }
@@ -99,10 +95,9 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
         mDatabase =  FirebaseDatabase.getInstance().getReference();
         itemCloudEndPoint = mDatabase.child("items");
 
-        calendar = Calendar.getInstance();
-
         formType = getArguments().getString(Values.FORM_TYPE);
         editValue = getArguments().getBoolean(Values.EDIT_VALUE);
+        formList= new ArrayList<>();
 
         switch (formType)
         {
@@ -112,8 +107,14 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
                     itemCloudEndPoint.child(getArguments().getString(Values.SELECTED_ITEM)).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            for (DataSnapshot noteSnapshot: dataSnapshot.getChildren()){
-                                item = noteSnapshot.getValue(Item.class);
+                            if (dataSnapshot.exists()) {
+                                item = dataSnapshot.getValue(Item.class);
+                                for (FormInfo detail : item.getDetails()) {
+                                    if (detail.getHint() != R.string.text_date) {
+                                        formList.add(detail);
+                                    }
+                                }
+                                setupRecyclerViewForm();
                             }
                         }
 
@@ -126,11 +127,14 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
                 else
                 {
                     item = new Item();
-                    String key = itemCloudEndPoint.push().getKey();
-                    item.setId(key);
-                    itemCloudEndPoint.child(key).setValue(item);
+                    item.setId(itemCloudEndPoint.push().getKey());
+                    for (FormInfo detail : item.getDetails()) {
+                        if (detail.getHint() !=  R.string.text_date) {
+                            formList.add(detail);
+                        }
+                    }
+                    setupRecyclerViewForm();
                 }
-                formList = item.getDetails();
                 break;
         }
     }
@@ -221,17 +225,6 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
                                 formList.get(recyclerPosition).setText(viewHolder.editText.getText().toString());
                             }
                         });
-                        if (item.getImage() == R.drawable.button) {
-                            datePosition = recyclerPosition;
-                            viewHolder.editText.setFocusable(false);
-                            viewHolder.editText.setFocusableInTouchMode(false);
-                            viewHolder.editText.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    datePickerDialog.show();
-                                }
-                            });
-                        }
                     }
 
                     @Override
@@ -321,24 +314,7 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
                     .into(toolbarImageViewMain);
             imageBoolean = true;
         }
-        fabMenu.getMenuIconView().setImageDrawable(getResources().getDrawable(R.drawable.button, getActivity().getTheme()));
-    }
-
-    private void addItem()
-    {
-        Animations.toolbarAnimation(getActivity(), R.anim.fade_out, R.anim.fade_in, R.raw.photo_coffee_beans, R.raw.photo_coffee_beans);
-        Bundle bundle = new Bundle();
-        bundle.putString(Values.FORM_TYPE, Values.ITEM);
-        bundle.putBoolean(Values.EDIT_VALUE, false);
-        FragmentForm fragment = new FragmentForm();
-        fragment.setArguments(bundle);
-        getActivity()
-                .getSupportFragmentManager()
-                .beginTransaction()
-                .setCustomAnimations(R.anim.slide_up_in, R.anim.slide_down_out, R.anim.slide_up_in, R.anim.slide_down_out)
-                .replace(R.id.fragment_container_main, fragment, fragment.getTAG())
-                .addToBackStack(fragment.getTAG())
-                .commit();
+        fabMenu.getMenuIconView().setImageDrawable(getResources().getDrawable(R.drawable.ic_save, getActivity().getTheme()));
     }
 
     public String getFormType() {
@@ -362,6 +338,8 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
 //                   String imageName = ImageUtils.saveImage(getActivity(), imageURI, item.getType(), item.getId(), item.getImageName());
 //                   item.setImageName(imageName);
 //               }
+                SimpleDateFormat dateFormat = new SimpleDateFormat(getString(R.string.time_format));
+                item.setDateCreated(dateFormat.format(Calendar.getInstance().getTime()));
                 itemCloudEndPoint.child(item.getId()).setValue(item);
                 backPress();
                 break;
@@ -411,7 +389,7 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
                 toolbarTextView.startAnimation(AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.fade_in));
                 break;
         }
-        fabMenu.getMenuIconView().setImageDrawable(getResources().getDrawable(R.drawable.button, getActivity().getTheme()));
+        fabMenu.getMenuIconView().setImageDrawable(getResources().getDrawable(R.drawable.ic_save, getActivity().getTheme()));
     }
 
     @Override

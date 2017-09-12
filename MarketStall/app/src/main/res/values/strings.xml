@@ -8,7 +8,6 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="tab_title_items">Items</string>
-    <string name="text_location">Location</string>
 
 
     <string name="change_image">Click to set the image</string>
@@ -19,12 +18,14 @@
 
     <!--Text input error-->
     <string name="text_error_name_item">Enter the item name</string>
+    <string name="time_format">dd/MM/yyyy hh:mm:ss aa</string>
 
     <!--Text view-->
     <string name="brews">Brews</string>
     <string name="text_name">Name</string>
     <string name="text_date">Date</string>
     <string name="text_price">Price</string>
+    <string name="text_location">Location</string>
 
     <!--Button texts-->
     <string name="button_delete">Delete</string>

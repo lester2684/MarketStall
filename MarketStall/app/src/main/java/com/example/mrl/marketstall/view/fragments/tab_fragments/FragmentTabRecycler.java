@@ -23,8 +23,8 @@ import com.example.mrl.marketstall.model.Item;
 import com.example.mrl.marketstall.ui.Animations;
 import com.example.mrl.marketstall.ui.DividerItemDecoration;
 import com.example.mrl.marketstall.value.Values;
+import com.example.mrl.marketstall.view.fragments.FragmentDetails;
 import com.example.mrl.marketstall.view.fragments.FragmentForm;
-import com.example.mrl.marketstall.view.fragments.FragmentTabHost;
 import com.example.mrl.marketstall.viewholder.RecyclerViewHolder;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
@@ -90,6 +90,7 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
         itemCloudEndPoint.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                items.clear();
                 for (DataSnapshot itemSnapshot: dataSnapshot.getChildren()){
                     Item item = itemSnapshot.getValue(Item.class);
                     items.add(item);
@@ -287,16 +288,16 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
             case Values.ITEM:
                 Animations.toolbarAnimation(getActivity(), R.anim.slide_left_out, R.anim.slide_right_in, R.raw.photo_pour_over, R.raw.photo_pour_over);
                 bundle.putString(Values.SELECTED_ITEM, items.get(position).getId());
-                bundle.putBoolean(Values.EDIT_VALUE, true);
-                bundle.putString(Values.TAB_TYPE, Values.TAB_ITEM_DETAILS);
-                FragmentTabHost fragmentTabHost = new FragmentTabHost();
-                fragmentTabHost.setArguments(bundle);
+                bundle.putBoolean(Values.EDIT_VALUE, false);
+                bundle.putString(Values.DETAILS_TYPE, Values.ITEM);
+                FragmentDetails fragmentDetails = new FragmentDetails();
+                fragmentDetails.setArguments(bundle);
                 getActivity()
                         .getSupportFragmentManager()
                         .beginTransaction()
                         .setCustomAnimations(R.anim.slide_right_in, R.anim.slide_left_out, R.anim.slide_left_in, R.anim.slide_right_out)
-                        .replace(R.id.fragment_container_main, fragmentTabHost, fragmentTabHost.getTAG())
-                        .addToBackStack(fragmentTabHost.getTag())
+                        .replace(R.id.fragment_container_main, fragmentDetails, fragmentDetails.getTAG())
+                        .addToBackStack(fragmentDetails.getTag())
                         .commit();
                 break;
         }
