@@ -30,8 +30,9 @@ import com.example.mrl.marketstall.interfaces.Callbacks;
 import com.example.mrl.marketstall.value.Values;
 import com.example.mrl.marketstall.view.fragments.FragmentTabHost;
 
+import java.util.List;
+
 import static com.example.mrl.marketstall.utils.Utils.getCurrentFragment;
-import static com.example.mrl.marketstall.value.Values.WRITE_EXTERNAL_RESULT;
 
 public class MainActivity extends AppCompatActivity implements  View.OnClickListener, NavigationView.OnNavigationItemSelectedListener, AppBarLayout.OnOffsetChangedListener{
 
@@ -40,6 +41,8 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
     private Callbacks nextFragmentCallback;
     private ActionBarDrawerToggle toggle;
     private int counter = 0;
+    private List<String> permissions = Values.permissions;
+    private List<Integer> permissionCodes = Values.permissionCodes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -53,13 +56,17 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
 
     private void checkPermissions()
     {
-        int has_Read_external_storage_Permission = ContextCompat.checkSelfPermission(MainActivity.this, Values.READ_EXTERNAL_STORAGE);
-        if (has_Read_external_storage_Permission != PackageManager.PERMISSION_GRANTED)
+        permissions = Values.permissions;
+        permissionCodes = Values.permissionCodes;
+        for(int i = 0; i < permissions.size(); i++)
         {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[] {Values.READ_EXTERNAL_STORAGE}, Values.WRITE_EXTERNAL_RESULT);
+            int has_Permission = ContextCompat.checkSelfPermission(MainActivity.this, permissions.get(i));
+            if (has_Permission != PackageManager.PERMISSION_GRANTED)
+            {
+                ActivityCompat.requestPermissions(MainActivity.this, new String[] {permissions.get(i)}, permissionCodes.get(i));
+            }
         }
     }
-
     private void setupToolbar()
     {
         AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
@@ -170,18 +177,16 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
     {
-        switch (requestCode)
+        int code = permissionCodes.indexOf(requestCode);
+        if (!(grantResults[0] == PackageManager.PERMISSION_GRANTED))
         {
-            case WRITE_EXTERNAL_RESULT:
-                if (!(grantResults[0] == PackageManager.PERMISSION_GRANTED))
-                {
-                    // Permission Denied
-                    Toast.makeText(MainActivity.this, "WRITE_EXTERNAL_RESULT Denied", Toast.LENGTH_SHORT)
-                            .show();
-                }
-                break;
-            default:
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            // Permission Denied
+            Toast.makeText(MainActivity.this, this.permissions.get(code)+" Denied", Toast.LENGTH_SHORT)
+                    .show();
+        }
+        else
+        {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 

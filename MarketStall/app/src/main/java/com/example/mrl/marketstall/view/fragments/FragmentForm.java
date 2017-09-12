@@ -1,15 +1,24 @@
 package com.example.mrl.marketstall.view.fragments;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -48,8 +57,7 @@ import java.util.List;
 
 import static com.bumptech.glide.Glide.with;
 
-public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdit
-{
+public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdit {
     private final String TAG = getClass().getSimpleName();
     private static int LOAD_IMAGE_RESULTS = 1;
     private View view;
@@ -60,6 +68,8 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
     private RecyclerView recyclerViewForm;
     private DatabaseReference mDatabase;
     private DatabaseReference itemCloudEndPoint;
+    private LocationManager locationManager;
+    private double longitudeGPS, latitudeGPS;
     private Item item;
     private String tabType;
     private Boolean editValue = false;
@@ -71,8 +81,7 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
     private boolean imageSelected = false;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-    {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         view = inflater.inflate(R.layout.fragment_form, container, false);
 
@@ -83,8 +92,7 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
         return view;
     }
 
-    private void setupValues()
-    {
+    private void setupValues() {
         toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
         toolbarImageViewMain = (ImageView) getActivity().findViewById(R.id.toolbar_image_main);
         toolbarTextView = (TextView) getActivity().findViewById(R.id.toolbar_text_view);
@@ -92,18 +100,18 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
 
         recyclerViewForm = (RecyclerView) view.findViewById(R.id.recyclerViewForm);
 
-        mDatabase =  FirebaseDatabase.getInstance().getReference();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
         itemCloudEndPoint = mDatabase.child("items");
+
+        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
 
         formType = getArguments().getString(Values.FORM_TYPE);
         editValue = getArguments().getBoolean(Values.EDIT_VALUE);
-        formList= new ArrayList<>();
+        formList = new ArrayList<>();
 
-        switch (formType)
-        {
+        switch (formType) {
             case Values.ITEM:
-                if (editValue)
-                {
+                if (editValue) {
                     itemCloudEndPoint.child(getArguments().getString(Values.SELECTED_ITEM)).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -123,13 +131,11 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
                             Log.d(TAG, databaseError.getMessage());
                         }
                     });
-                }
-                else
-                {
+                } else {
                     item = new Item();
                     item.setId(itemCloudEndPoint.push().getKey());
                     for (FormInfo detail : item.getDetails()) {
-                        if (detail.getHint() !=  R.string.text_date) {
+                        if (detail.getHint() != R.string.text_date) {
                             formList.add(detail);
                         }
                     }
@@ -139,18 +145,14 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
         }
     }
 
-    private void setupToolbar()
-    {
+    private void setupToolbar() {
         AppBarLayout appBarLayout = (AppBarLayout) getActivity().findViewById(R.id.app_bar_layout);
         appBarLayout.setExpanded(true);
         toolbar.getMenu().clear();
-        switch (formType)
-        {
+        switch (formType) {
             case Values.ITEM:
-                toolbarTextView.setOnClickListener(new View.OnClickListener()
-                {
-                    public void onClick(View v)
-                    {
+                toolbarTextView.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
                         openGallery();
                     }
                 });
@@ -158,53 +160,43 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
                 toolbarTextView.startAnimation(AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.fade_in));
 
                 break;
-    }
+        }
         CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout) getActivity().findViewById(R.id.collapsing_toolbar_layout);
         collapsingToolbarLayout.setTitle(" ");
     }
 
-    private void setupFAB()
-    {
+    private void setupFAB() {
         fabMenu.getMenuIconView().setImageDrawable(getResources().getDrawable(R.drawable.ic_save, getActivity().getTheme()));
-        fabMenu.setOnMenuButtonClickListener(new View.OnClickListener()
-        {
+        fabMenu.setOnMenuButtonClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
+            public void onClick(View v) {
                 save();
             }
         });
-        if(!fabMenu.isShown())
-        {
+        if (!fabMenu.isShown()) {
             showFabMenu();
         }
     }
 
-    private void setupRecyclerViewForm()
-    {
+    private void setupRecyclerViewForm() {
         RecyclerGenericAdapter<FormInfo> formInfoRecyclerAdapter = null;
-        switch (formType)
-        {
+        switch (formType) {
             case Values.ITEM:
-                formInfoRecyclerAdapter = new RecyclerGenericAdapter<FormInfo>(getActivity(), formList)
-                {
+                formInfoRecyclerAdapter = new RecyclerGenericAdapter<FormInfo>(getActivity(), formList) {
                     @Override
-                    public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, int viewType, OnRecyclerItemClicked onRecyclerItemClicked)
-                    {
+                    public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, int viewType, OnRecyclerItemClicked onRecyclerItemClicked) {
                         final View holder;
                         holder = LayoutInflater.from(getActivity()).inflate(R.layout.recycler_row_form, parent, false);
                         return new RecyclerViewHolderForm(holder);
                     }
 
                     @Override
-                    public void onBindData(Context context, RecyclerView.ViewHolder holder, FormInfo item, final int recyclerPosition)
-                    {
+                    public void onBindData(Context context, RecyclerView.ViewHolder holder, FormInfo item, final int recyclerPosition) {
                         final RecyclerViewHolderForm viewHolder;
                         viewHolder = (RecyclerViewHolderForm) holder;
                         viewHolder.editText.setText(item.getText());
                         viewHolder.textInputLayout.setHint(getString(item.getHint()));
-                        if (item.getImage() != 0)
-                        {
+                        if (item.getImage() != 0) {
                             with(getContext())
                                     .load(item.getImage())
                                     .into(viewHolder.icon);
@@ -228,8 +220,7 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
                     }
 
                     @Override
-                    public OnRecyclerItemClicked onGetRecyclerItemClickListener()
-                    {
+                    public OnRecyclerItemClicked onGetRecyclerItemClickListener() {
                         return new OnRecyclerItemClicked() {
                             @Override
                             public void onItemClicked(View view, int position) {
@@ -243,6 +234,53 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
         recyclerViewForm.setAdapter(formInfoRecyclerAdapter);
         recyclerViewForm.setHasFixedSize(true);
         recyclerViewForm.setLayoutManager(new LinearLayoutManager(getActivity()));
+    }
+
+    private void getLocation() {
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2 * 60 * 1000, 10, locationListenerGPS);
+//            locationManager.removeUpdates(locationListenerGPS);
+        }
+    }
+
+    private final LocationListener locationListenerGPS = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            longitudeGPS = location.getLongitude();
+            latitudeGPS = location.getLatitude();
+        }
+
+        @Override
+        public void onStatusChanged(String s, int i, Bundle bundle) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String s) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String s) {
+
+        }
+    };
+
+    private void showAlert() {
+        final AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
+        dialog.setTitle("Enable Location").setMessage("Your Locations Settings is set to 'Off'.\nPlease Enable Location to " + "use this app").setPositiveButton("Location Settings", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                        Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        startActivity(myIntent);
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    }
+                });
+        dialog.show();
     }
 
     private void showFabMenu()
@@ -340,6 +378,8 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
 //               }
                 SimpleDateFormat dateFormat = new SimpleDateFormat(getString(R.string.time_format));
                 item.setDateCreated(dateFormat.format(Calendar.getInstance().getTime()));
+                getLocation();
+                item.setLocation(longitudeGPS+","+latitudeGPS);
                 itemCloudEndPoint.child(item.getId()).setValue(item);
                 backPress();
                 break;
