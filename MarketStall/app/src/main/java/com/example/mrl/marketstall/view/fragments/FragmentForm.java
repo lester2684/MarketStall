@@ -1,24 +1,15 @@
 package com.example.mrl.marketstall.view.fragments;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.Settings;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -40,6 +31,7 @@ import com.example.mrl.marketstall.interfaces.Callbacks;
 import com.example.mrl.marketstall.interfaces.CallbacksTabEdit;
 import com.example.mrl.marketstall.model.FormInfo;
 import com.example.mrl.marketstall.model.Item;
+import com.example.mrl.marketstall.utils.GPSTracker;
 import com.example.mrl.marketstall.utils.Utils;
 import com.example.mrl.marketstall.value.Values;
 import com.example.mrl.marketstall.viewholder.RecyclerViewHolderForm;
@@ -68,8 +60,9 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
     private RecyclerView recyclerViewForm;
     private DatabaseReference mDatabase;
     private DatabaseReference itemCloudEndPoint;
-    private LocationManager locationManager;
-    private double longitudeGPS, latitudeGPS;
+    private double latitude;
+    private double longitude;
+    private GPSTracker gps;
     private Item item;
     private String tabType;
     private Boolean editValue = false;
@@ -103,7 +96,7 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
         mDatabase = FirebaseDatabase.getInstance().getReference();
         itemCloudEndPoint = mDatabase.child("items");
 
-        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        gps = new GPSTracker(getActivity());
 
         formType = getArguments().getString(Values.FORM_TYPE);
         editValue = getArguments().getBoolean(Values.EDIT_VALUE);
@@ -118,7 +111,8 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
                             if (dataSnapshot.exists()) {
                                 item = dataSnapshot.getValue(Item.class);
                                 for (FormInfo detail : item.getDetails()) {
-                                    if (detail.getHint() != R.string.text_date) {
+                                    if (detail.getShow()) {
+                                        Log.d(TAG, "onDataChangeXXXXXXXXXXXXXXXXXXXXX: " + detail.getHint());
                                         formList.add(detail);
                                     }
                                 }
@@ -135,7 +129,7 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
                     item = new Item();
                     item.setId(itemCloudEndPoint.push().getKey());
                     for (FormInfo detail : item.getDetails()) {
-                        if (detail.getHint() != R.string.text_date) {
+                        if (detail.getShow()) {
                             formList.add(detail);
                         }
                     }
@@ -236,53 +230,6 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
         recyclerViewForm.setLayoutManager(new LinearLayoutManager(getActivity()));
     }
 
-    private void getLocation() {
-        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2 * 60 * 1000, 10, locationListenerGPS);
-//            locationManager.removeUpdates(locationListenerGPS);
-        }
-    }
-
-    private final LocationListener locationListenerGPS = new LocationListener() {
-        @Override
-        public void onLocationChanged(Location location) {
-            longitudeGPS = location.getLongitude();
-            latitudeGPS = location.getLatitude();
-        }
-
-        @Override
-        public void onStatusChanged(String s, int i, Bundle bundle) {
-
-        }
-
-        @Override
-        public void onProviderEnabled(String s) {
-
-        }
-
-        @Override
-        public void onProviderDisabled(String s) {
-
-        }
-    };
-
-    private void showAlert() {
-        final AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
-        dialog.setTitle("Enable Location").setMessage("Your Locations Settings is set to 'Off'.\nPlease Enable Location to " + "use this app").setPositiveButton("Location Settings", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                        Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                        startActivity(myIntent);
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                    }
-                });
-        dialog.show();
-    }
-
     private void showFabMenu()
     {
         if (fabMenu.getVisibility() == View.INVISIBLE)
@@ -378,8 +325,14 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
 //               }
                 SimpleDateFormat dateFormat = new SimpleDateFormat(getString(R.string.time_format));
                 item.setDateCreated(dateFormat.format(Calendar.getInstance().getTime()));
-                getLocation();
-                item.setLocation(longitudeGPS+","+latitudeGPS);
+                if(gps.canGetLocation()){
+                    latitude = gps.getLatitude();
+                    longitude = gps.getLongitude();
+                    Log.d(TAG, "save: " + latitude +" " + longitude);
+                }else{
+                    gps.showSettingsAlert();
+                }
+                item.setLocation(longitude+","+latitude);
                 itemCloudEndPoint.child(item.getId()).setValue(item);
                 backPress();
                 break;

@@ -1,19 +1,15 @@
 package com.example.mrl.marketstall.view;
 
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -22,7 +18,6 @@ import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.mrl.marketstall.R;
@@ -30,19 +25,15 @@ import com.example.mrl.marketstall.interfaces.Callbacks;
 import com.example.mrl.marketstall.value.Values;
 import com.example.mrl.marketstall.view.fragments.FragmentTabHost;
 
-import java.util.List;
-
 import static com.example.mrl.marketstall.utils.Utils.getCurrentFragment;
 
-public class MainActivity extends AppCompatActivity implements  View.OnClickListener, NavigationView.OnNavigationItemSelectedListener, AppBarLayout.OnOffsetChangedListener{
+public class MainActivity extends RuntimePermissionsActivity implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener, AppBarLayout.OnOffsetChangedListener{
 
     private final String TAG = getClass().getSimpleName();
     private Callbacks currentFragmentCallback;
     private Callbacks nextFragmentCallback;
     private ActionBarDrawerToggle toggle;
     private int counter = 0;
-    private List<String> permissions = Values.permissions;
-    private List<Integer> permissionCodes = Values.permissionCodes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -54,18 +45,13 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
         toRecycler();
     }
 
+    @Override
+    public void onPermissionsGranted(int requestCode) {
+    }
+
     private void checkPermissions()
     {
-        permissions = Values.permissions;
-        permissionCodes = Values.permissionCodes;
-        for(int i = 0; i < permissions.size(); i++)
-        {
-            int has_Permission = ContextCompat.checkSelfPermission(MainActivity.this, permissions.get(i));
-            if (has_Permission != PackageManager.PERMISSION_GRANTED)
-            {
-                ActivityCompat.requestPermissions(MainActivity.this, new String[] {permissions.get(i)}, permissionCodes.get(i));
-            }
-        }
+        MainActivity.super.requestAppPermissions(Values.permissions, R.string.runtime_permissions_error_message, Values.permissionCode);
     }
     private void setupToolbar()
     {
@@ -171,22 +157,6 @@ public class MainActivity extends AppCompatActivity implements  View.OnClickList
             {
                 currentFragmentCallback.toolbarCollapsed();
             }
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
-    {
-        int code = permissionCodes.indexOf(requestCode);
-        if (!(grantResults[0] == PackageManager.PERMISSION_GRANTED))
-        {
-            // Permission Denied
-            Toast.makeText(MainActivity.this, this.permissions.get(code)+" Denied", Toast.LENGTH_SHORT)
-                    .show();
-        }
-        else
-        {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 

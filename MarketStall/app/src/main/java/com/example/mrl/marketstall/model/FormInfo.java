@@ -6,12 +6,14 @@ public class FormInfo
     private String text;
     private int image;
     private int hint;
+    private boolean show;
 
-    public FormInfo(String text, int image, int hint)
+    public FormInfo(String text, int image, int hint, boolean show)
     {
         this.text = text;
         this.image = image;
         this.hint = hint;
+        this.show = show;
     }
 
     public int getImage()
@@ -29,8 +31,14 @@ public class FormInfo
         return hint;
     }
 
+    public boolean getShow()
+    {
+        return show;
+    }
+
     public void setText(String text)
     {
         this.text = text;
     }
+
 }

@@ -26,10 +26,10 @@ public class Item
     public List<FormInfo> getDetails()
     {
         List<FormInfo> details = new ArrayList<>();
-        details.add(0, new FormInfo(name, R.raw.icon_name, R.string.text_name));
-        details.add(1, new FormInfo(dateCreated, R.drawable.ic_date, R.string.text_date));
-        details.add(2, new FormInfo(String.valueOf(price), R.raw.icon_price, R.string.text_price));
-        details.add(3, new FormInfo(String.valueOf(location), R.drawable.ic_location, R.string.text_location));
+        details.add(0, new FormInfo(name, R.raw.icon_name, R.string.text_name, true));
+        details.add(1, new FormInfo(dateCreated, R.drawable.ic_date, R.string.text_date, false));
+        details.add(2, new FormInfo(String.valueOf(price), R.raw.icon_price, R.string.text_price, true));
+        details.add(3, new FormInfo(String.valueOf(location), R.drawable.ic_location, R.string.text_location, false));
         TOTAL_FORM_SIZE = details.size() -3;
         return details;
     }

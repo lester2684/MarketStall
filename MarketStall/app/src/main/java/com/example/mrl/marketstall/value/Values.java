@@ -1,12 +1,9 @@
 package com.example.mrl.marketstall.value;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class Values
 {
-    public static final List<String> permissions = Arrays.asList("android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.READ_EXTERNAL_STORAGE","android.permission.ACCESS_FINE_LOCATION");
-    public static final List<Integer> permissionCodes = Arrays.asList(101, 102, 103);
+    public static final String[] permissions = {"android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.READ_EXTERNAL_STORAGE","android.permission.ACCESS_FINE_LOCATION"};
+    public static final int permissionCode = 101;
 
     public final static String SELECTED_ITEM = "selected_item";
     public final static String EDIT_VALUE = "edit_value";
