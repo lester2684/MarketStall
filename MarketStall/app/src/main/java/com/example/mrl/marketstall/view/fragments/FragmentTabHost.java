@@ -84,6 +84,7 @@ public class FragmentTabHost extends Fragment implements Callbacks
         {
             case Values.TAB_RECYCLERS:
                 tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.tab_title_items)));
+                tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.tab_title_map)));
                 break;
         }
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
@@ -95,6 +96,7 @@ public class FragmentTabHost extends Fragment implements Callbacks
                 switch (tabType)
                 {
                     case Values.TAB_RECYCLERS:
+                        viewPager.setCurrentItem(tab.getPosition());
                         break;
                 }
             }
@@ -121,12 +123,15 @@ public class FragmentTabHost extends Fragment implements Callbacks
         {
             case Values.TAB_RECYCLERS:
                 fragmentList.add(new FragmentTabRecycler());
+                fragmentList.add(new FragmentMap());
 
                 Bundle bundleItem = new Bundle();
+                Bundle bundleMap = new Bundle();
                 bundleItem.putString(Values.RECYCLER_TYPE, Values.ITEM);
 
                 List<Bundle> bundleList = new ArrayList<>();
                 bundleList.add(bundleItem);
+                bundleList.add(bundleMap);
 
                 for(int i = 0; i < fragmentList.size(); i++)
                 {
@@ -152,6 +157,8 @@ public class FragmentTabHost extends Fragment implements Callbacks
                 switch (tabType)
                 {
                     case Values.TAB_RECYCLERS:
+                        tabLayout.getTabAt(position).select();
+                        break;
                 }
             }
 

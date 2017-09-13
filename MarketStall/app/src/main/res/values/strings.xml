@@ -8,6 +8,7 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="tab_title_items">Items</string>
+    <string name="tab_title_map">Map</string>
 
 
     <string name="change_image">Click to set the image</string>
@@ -37,5 +38,6 @@
 
     <!--Path to saved photos-->
     <string name="photos_folders">/coffee_book/images</string>
+    <string name="title_activity_maps">Map</string>
 
 </resources>
