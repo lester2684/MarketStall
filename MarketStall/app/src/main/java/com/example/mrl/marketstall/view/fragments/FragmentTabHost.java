@@ -177,11 +177,11 @@ public class FragmentTabHost extends Fragment implements Callbacks
         Log.i(TAG, "onReturn: " + fromFragment.getClass().getSimpleName() + " " + fromTabType + " "+ tabType);
         if (fromFragment instanceof FragmentForm)
         {
-            toolbarAnimation(getActivity(), R.anim.fade_out, R.anim.fade_in, R.raw.photo_coffee_cherries, R.raw.photo_coffee_cherries);
+            toolbarAnimation(getActivity(), R.anim.fade_out, R.anim.fade_in, null, R.raw.photo_coffee_cherries);
         }
         else if (fromFragment instanceof FragmentForm)
         {
-            toolbarAnimation(getActivity(), R.anim.fade_out, R.anim.fade_in, R.raw.photo_coffee_cherries, R.raw.photo_coffee_cherries);
+            toolbarAnimation(getActivity(), R.anim.fade_out, R.anim.fade_in, null, R.raw.photo_coffee_cherries);
         }
         else if (fromFragment instanceof FragmentDetails)
         {
@@ -189,22 +189,21 @@ public class FragmentTabHost extends Fragment implements Callbacks
             switch (fragmentDetails.getDetailsType())
             {
                 case Values.ITEM:
-                    toolbarAnimation(getActivity(), R.anim.slide_right_out, R.anim.slide_left_in, R.raw.photo_coffee_cherries, R.raw.photo_coffee_cherries);
+                    toolbarAnimation(getActivity(), R.anim.slide_right_out, R.anim.slide_left_in, null, R.raw.photo_coffee_cherries);
                     break;
             }
         }
         else if (fromFragment instanceof FragmentTabHost && fromTabType.equals(Values.TAB_ITEM_DETAILS))
         {
-            toolbarAnimation(getActivity(), R.anim.slide_right_out, R.anim.slide_left_in, R.raw.photo_coffee_cherries, R.raw.photo_coffee_cherries);
+            toolbarAnimation(getActivity(), R.anim.slide_right_out, R.anim.slide_left_in, null, R.raw.photo_coffee_cherries);
         }
         else if (fromFragment instanceof FragmentTabHost && fromTabType.equals(Values.TAB_ITEM_EDIT) && !tabType.equals(Values.TAB_ITEM_DETAILS))
         {
-//            Uri uri = ImageUtils.getItemPhotoUri(getContext(), item);
-//            toolbarAnimation(getActivity(), R.anim.fade_out, R.anim.fade_in, uri.getPath(), R.raw.photo_pour_over);
+            toolbarAnimation(getActivity(), R.anim.fade_out, R.anim.fade_in, null, R.raw.photo_pour_over);
         }
         else if (fromFragment instanceof FragmentTabHost && fromTabType.equals(Values.TAB_ITEM_NEW))
         {
-            toolbarAnimation(getActivity(), R.anim.fade_out, R.anim.fade_in, R.raw.photo_coffee_cherries, R.raw.photo_coffee_cherries);
+            toolbarAnimation(getActivity(), R.anim.fade_out, R.anim.fade_in, null, R.raw.photo_coffee_cherries);
         }
     }
 

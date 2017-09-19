@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -21,8 +22,11 @@ import com.example.mrl.marketstall.adapter.RecyclerGenericAdapter;
 import com.example.mrl.marketstall.interfaces.Callbacks;
 import com.example.mrl.marketstall.model.FormInfo;
 import com.example.mrl.marketstall.model.Item;
+import com.example.mrl.marketstall.ui.Animations;
+import com.example.mrl.marketstall.utils.ImageUtils;
 import com.example.mrl.marketstall.value.Values;
 import com.example.mrl.marketstall.viewholder.RecyclerViewHolderDetails;
+import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.google.firebase.database.DataSnapshot;
@@ -33,6 +37,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.bumptech.glide.Glide.with;
 
 public class FragmentDetails extends Fragment implements Callbacks
 {
@@ -68,13 +74,13 @@ public class FragmentDetails extends Fragment implements Callbacks
 
     private void setupValues()
     {
-        toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
-        collapsingToolbarLayout = (CollapsingToolbarLayout) getActivity().findViewById(R.id.collapsing_toolbar_layout);
-        fabMenu = (FloatingActionMenu) getActivity().findViewById(R.id.fab_menu);
-        fabEdit = (FloatingActionButton) getActivity().findViewById(R.id.fab2);
-        fabDelete = (FloatingActionButton) getActivity().findViewById(R.id.fab3);
-        addInfoButton = (TextView) view.findViewById(R.id.button_add_info);
-        recyclerViewDetails = (RecyclerView) view.findViewById(R.id.recyclerViewDetails);
+        toolbar = getActivity().findViewById(R.id.toolbar);
+        collapsingToolbarLayout = getActivity().findViewById(R.id.collapsing_toolbar_layout);
+        fabMenu = getActivity().findViewById(R.id.fab_menu);
+        fabEdit = getActivity().findViewById(R.id.fab2);
+        fabDelete = getActivity().findViewById(R.id.fab3);
+        addInfoButton = view.findViewById(R.id.button_add_info);
+        recyclerViewDetails = view.findViewById(R.id.recyclerViewDetails);
 
         detailsType = getArguments().getString(Values.DETAILS_TYPE);
 
@@ -101,7 +107,7 @@ public class FragmentDetails extends Fragment implements Callbacks
 
     private void setupToolbar()
     {
-        AppBarLayout appBarLayout = (AppBarLayout) getActivity().findViewById(R.id.app_bar_layout);
+        AppBarLayout appBarLayout = getActivity().findViewById(R.id.app_bar_layout);
         appBarLayout.setExpanded(true);
         toolbar.getMenu().clear();
     }
@@ -149,7 +155,7 @@ public class FragmentDetails extends Fragment implements Callbacks
         switch (detailsType)
         {
             case Values.ITEM:
-                total_form_size = item.getTOTAL_FORM_SIZE();
+                total_form_size = item.getTotal_form_size();
                 break;
         }
         if (detailsList.size() < total_form_size )
@@ -171,7 +177,7 @@ public class FragmentDetails extends Fragment implements Callbacks
         detailsInfoRecyclerAdapter = new RecyclerGenericAdapter<FormInfo>(getActivity() , detailsList)
         {
             @Override
-            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, int viewType, OnRecyclerItemClicked onRecyclerItemClicked)
+            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, int viewType, OnRecyclerItemClicked onRecyclerItemClicked, List item)
             {
                 final View view = LayoutInflater.from(getActivity()).inflate(R.layout.recycler_row_details, parent, false);
                 return new RecyclerViewHolderDetails(view);
@@ -184,11 +190,11 @@ public class FragmentDetails extends Fragment implements Callbacks
                 viewHolder.text.setText(item.getText());
                 if (item.getImage() != 0)
                 {
-                    Glide
-                            .with(getContext())
+                    with(getContext())
                             .load(item.getImage())
                             .into(viewHolder.icon);
                 }
+                updateToolbarImage();
             }
 
             @Override
@@ -264,7 +270,7 @@ public class FragmentDetails extends Fragment implements Callbacks
         switch (detailsType)
         {
             case Values.ITEM:
-                formInfos = item.getDetails();
+                formInfos = item.detailsToForm();
                 formInfos = formInfos.subList(1, formInfos.size());
                 break;
         }
@@ -283,7 +289,7 @@ public class FragmentDetails extends Fragment implements Callbacks
         switch (detailsType)
         {
             case Values.ITEM:
-//                ImageUtils.deleteImage(getActivity(), coffee.getImageName());
+                ImageUtils.deleteImage(getActivity(), item);
                 itemCloudEndPoint.child(item.getId()).setValue(null);
         }
         backPress();
@@ -314,6 +320,19 @@ public class FragmentDetails extends Fragment implements Callbacks
 
     }
 
+    private void updateToolbarImage()
+    {
+        if(item != null) {
+            ImageView toolbarImageViewMain = getActivity().findViewById(R.id.toolbar_image_main);
+            Glide
+                    .with(getActivity())
+                    .using(new FirebaseImageLoader())
+                    .load(ImageUtils.getImage(item))
+                    .error(R.raw.photo_pour_over)
+                    .into(toolbarImageViewMain);
+        }
+    }
+
     public String getDetailsType() {
         return detailsType;
     }
@@ -341,6 +360,7 @@ public class FragmentDetails extends Fragment implements Callbacks
     public void onResume()
     {
         Log.i(TAG, "onResume: ");
+        updateToolbarImage();
         super.onResume();
     }
 
@@ -371,8 +391,7 @@ public class FragmentDetails extends Fragment implements Callbacks
             switch (detailsType)
             {
                 case Values.ITEM:
-//                    Uri uri = ImageUtils.getCoffeePhotoUri(getContext(), item);
-//                    Animations.toolbarAnimation(getActivity(), R.anim.slide_right_out, R.anim.slide_left_in, uri.getPath(), R.raw.photo_coffee_beans);
+                    Animations.toolbarAnimation(getActivity(), R.anim.slide_right_out, R.anim.slide_left_in, ImageUtils.getImage(item), R.raw.photo_coffee_beans);
                     break;
             }
 

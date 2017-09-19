@@ -15,7 +15,7 @@ public abstract class RecyclerGenericAdapter<T> extends RecyclerView.Adapter<Rec
     private List<T> items;
     private OnRecyclerItemClicked onRecyclerItemClicked;
 
-    public abstract RecyclerView.ViewHolder setViewHolder(ViewGroup parent, int viewType, OnRecyclerItemClicked onRecyclerItemClicked);
+    public abstract RecyclerView.ViewHolder setViewHolder(ViewGroup parent, int viewType, OnRecyclerItemClicked onRecyclerItemClicked, List<T> items);
 
     public abstract void onBindData(Context context, RecyclerView.ViewHolder holder, T val, int position);
 
@@ -31,13 +31,13 @@ public abstract class RecyclerGenericAdapter<T> extends RecyclerView.Adapter<Rec
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
-        return setViewHolder(parent , viewType, onRecyclerItemClicked);
+        return setViewHolder(parent , viewType, onRecyclerItemClicked, items);
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position)
     {
-        onBindData(context, holder,items.get(position), position);
+        onBindData(context, holder, items.get(position), position);
     }
 
     @Override

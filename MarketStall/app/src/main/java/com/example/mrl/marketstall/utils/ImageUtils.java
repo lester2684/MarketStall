@@ -5,84 +5,81 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.Toast;
 
-import com.example.mrl.marketstall.R;
+import com.example.mrl.marketstall.model.Item;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.Objects;
+import java.io.ByteArrayOutputStream;
 import java.util.Random;
 
 public class ImageUtils
 {
     private static final String TAG = "ImageUtils";
 
-    private static final String FORWARD_SLASH = "/";
-
-    public static void deleteImage(Activity activity, String imageName)
+    public static void deleteImage(final Activity activity, Item item)
     {
-        File sd = Environment.getExternalStorageDirectory();
-        String destinationImagePath = activity.getResources().getString(R.string.photos_folders);
-        File destinationFolder = new File(sd, destinationImagePath);
-
-        if (!destinationFolder.exists())
-        {
-            boolean destination = destinationFolder.mkdirs();
-            Log.i(TAG, "deleteImage: " + destinationImagePath + " " + destination);
-        }
-        if (imageName != null)
-        {
-            File file = new File(destinationFolder, imageName);
-            if (file.exists())
-            {
-                boolean delete = file.delete();
-                Log.i(TAG, "deleteImage: deleteCoffee" + imageName + " " + delete);
+        String fileName =   item.getImageName();
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReferenceFromUrl("gs://market-stall.appspot.com");
+        StorageReference fileRef = storageRef.child("images/"+fileName);
+        fileRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
             }
-        }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "deleteImage - onFailure: " + e);
+            }
+        });
     }
 
-    public static String saveImage(Activity activity, Uri sourceUri, String type, int id, String oldImageName)
+    public static void saveImage(final Activity activity, Uri sourceUri, Item item)
     {
         Random gen = new Random();
         int n = 10000;
         n = gen.nextInt(n);
-        String newFileName =   type + "-" + id + "-" + n + ".jpg";
-
-        File sd = Environment.getExternalStorageDirectory();
-        String destinationImagePath = activity.getResources().getString(R.string.photos_folders);
-        File destinationFolder = new File(sd, destinationImagePath);
-
-        if (!destinationFolder.exists())
-        {
-            boolean destination = destinationFolder.mkdirs();
-            Log.i(TAG, "saveImage: " + destinationImagePath + " " + destination);
-        }
-        if (!(oldImageName == null))
-        {
-            File file = new File(destinationFolder, oldImageName);
-            if (file.exists() && !Objects.equals(newFileName, oldImageName))
-            {
-                boolean delete = file.delete();
-                Log.i(TAG, "saveImage: deleteCoffee" + oldImageName + " " + delete);
-            }
-        }
+        String fileName =   item.getId() + "-" + n + ".jpg";
+        item.setImageName(fileName);
+        deleteImage(activity, item);
         try
         {
-            Bitmap bitmap = BitmapFactory.decodeFile(getPath(activity, sourceUri));
-            File newFile = new File(destinationFolder, newFileName);
-            FileOutputStream out = new FileOutputStream(newFile);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 70, out);
-            out.flush();
-            out.close();
+            final Bitmap bitmap = BitmapFactory.decodeFile(getPath(activity, sourceUri));
+            ByteArrayOutputStream file = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 70, file);
+            byte[] data = file.toByteArray();
+            file.flush();
+            file.close();
+            FirebaseStorage storage = FirebaseStorage.getInstance();
+            StorageReference storageRef = storage.getReferenceFromUrl("gs://market-stall.appspot.com");
+            StorageReference fileRef = storageRef.child("images/"+fileName);
+            UploadTask uploadTask = fileRef.putBytes(data);
+            Toast.makeText(activity, "Uploading....", Toast.LENGTH_LONG).show();
+            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    Toast.makeText(activity, "Upload successful", Toast.LENGTH_SHORT).show();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(activity, "Upload Failed -> " + e, Toast.LENGTH_SHORT).show();
+                }
+            });
+            bitmap.recycle();
         }
-        catch (Exception e)
+        catch (java.io.IOException e)
         {
             e.printStackTrace();
         }
-        return newFileName;
     }
 
     private static String getPath(Activity activity, Uri uri)
@@ -96,19 +93,11 @@ public class ImageUtils
         return path;
     }
 
-//    public static Uri getCoffeePhotoUri(Context context, Coffee coffee)
-//    {
-//        File sd = Environment.getExternalStorageDirectory();
-//        File destination = new File(sd, context.getString(R.string.photos_folders));
-//        File photo = new File(destination, FORWARD_SLASH + coffee.getImageName());
-//        return Uri.fromFile(photo);
-//    }
-//
-//    public static Uri getBrewPhotoUri(Context context, Brew brew)
-//    {
-//        File sd = Environment.getExternalStorageDirectory();
-//        File destination = new File(sd, context.getString(R.string.photos_folders));
-//        File photo = new File(destination, FORWARD_SLASH + brew.getImageName());
-//        return Uri.fromFile(photo);
-//    }
+    public static StorageReference getImage(Item item)
+    {
+        String fileName =   item.getImageName();
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference imageRef = storage.getReferenceFromUrl("gs://market-stall.appspot.com/images/"+fileName);
+        return imageRef;
+    }
 }

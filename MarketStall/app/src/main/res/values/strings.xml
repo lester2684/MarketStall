@@ -27,6 +27,8 @@
     <string name="text_date">Date</string>
     <string name="text_price">Price</string>
     <string name="text_location">Location</string>
+    <string name="text_category">Category</string>
+    <string name="text_quality_rating">Quality Rating</string>
 
     <string name="runtime_permissions_error_message">Please enable ALL permissions from app settings.</string>
 

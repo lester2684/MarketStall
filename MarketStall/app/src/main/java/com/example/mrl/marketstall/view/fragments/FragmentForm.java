@@ -17,24 +17,32 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.mrl.marketstall.R;
 import com.example.mrl.marketstall.adapter.RecyclerGenericAdapter;
+import com.example.mrl.marketstall.adapter.SpinnerGenericAdapter;
 import com.example.mrl.marketstall.interfaces.Callbacks;
 import com.example.mrl.marketstall.interfaces.CallbacksTabEdit;
 import com.example.mrl.marketstall.model.FormInfo;
 import com.example.mrl.marketstall.model.Item;
 import com.example.mrl.marketstall.utils.GPSTracker;
+import com.example.mrl.marketstall.utils.ImageUtils;
 import com.example.mrl.marketstall.utils.Utils;
 import com.example.mrl.marketstall.value.Values;
 import com.example.mrl.marketstall.viewholder.RecyclerViewHolderForm;
+import com.example.mrl.marketstall.viewholder.RecyclerViewHolderFormSpinner;
+import com.example.mrl.marketstall.viewholder.SpinnerViewHolder;
 import com.github.clans.fab.FloatingActionMenu;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -44,6 +52,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
@@ -71,7 +80,6 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
     private boolean showMenu = false;
     private List<FormInfo> formList;
     private String formType;
-    private boolean imageSelected = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -86,12 +94,12 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
     }
 
     private void setupValues() {
-        toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
-        toolbarImageViewMain = (ImageView) getActivity().findViewById(R.id.toolbar_image_main);
-        toolbarTextView = (TextView) getActivity().findViewById(R.id.toolbar_text_view);
-        fabMenu = (FloatingActionMenu) getActivity().findViewById(R.id.fab_menu);
+        toolbar = getActivity().findViewById(R.id.toolbar);
+        toolbarImageViewMain = getActivity().findViewById(R.id.toolbar_image_main);
+        toolbarTextView = getActivity().findViewById(R.id.toolbar_text_view);
+        fabMenu = getActivity().findViewById(R.id.fab_menu);
 
-        recyclerViewForm = (RecyclerView) view.findViewById(R.id.recyclerViewForm);
+        recyclerViewForm = view.findViewById(R.id.recyclerViewForm);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
         itemCloudEndPoint = mDatabase.child("items");
@@ -110,9 +118,8 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             if (dataSnapshot.exists()) {
                                 item = dataSnapshot.getValue(Item.class);
-                                for (FormInfo detail : item.getDetails()) {
+                                for (FormInfo detail : item.detailsToForm()) {
                                     if (detail.getShow()) {
-                                        Log.d(TAG, "onDataChangeXXXXXXXXXXXXXXXXXXXXX: " + detail.getHint());
                                         formList.add(detail);
                                     }
                                 }
@@ -128,7 +135,7 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
                 } else {
                     item = new Item();
                     item.setId(itemCloudEndPoint.push().getKey());
-                    for (FormInfo detail : item.getDetails()) {
+                    for (FormInfo detail : item.detailsToForm()) {
                         if (detail.getShow()) {
                             formList.add(detail);
                         }
@@ -155,7 +162,7 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
 
                 break;
         }
-        CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout) getActivity().findViewById(R.id.collapsing_toolbar_layout);
+        CollapsingToolbarLayout collapsingToolbarLayout = getActivity().findViewById(R.id.collapsing_toolbar_layout);
         collapsingToolbarLayout.setTitle(" ");
     }
 
@@ -178,39 +185,110 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
             case Values.ITEM:
                 formInfoRecyclerAdapter = new RecyclerGenericAdapter<FormInfo>(getActivity(), formList) {
                     @Override
-                    public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, int viewType, OnRecyclerItemClicked onRecyclerItemClicked) {
+                    public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, int viewType, OnRecyclerItemClicked onRecyclerItemClicked, List items) {
                         final View holder;
-                        holder = LayoutInflater.from(getActivity()).inflate(R.layout.recycler_row_form, parent, false);
-                        return new RecyclerViewHolderForm(holder);
+                        FormInfo formInfo = (FormInfo) items.get(viewType);
+                        switch (formInfo.getInputType())
+                        {
+                            case Values.SPINNER:
+                                holder = LayoutInflater.from(getActivity()).inflate(R.layout.recycler_row_spinner, parent, false);
+                                return new RecyclerViewHolderFormSpinner(holder);
+                            case Values.TEXTFIElD:
+                                holder = LayoutInflater.from(getActivity()).inflate(R.layout.recycler_row_form, parent, false);
+                                return new RecyclerViewHolderForm(holder);
+                            default:
+                                holder = LayoutInflater.from(getActivity()).inflate(R.layout.recycler_row_form, parent, false);
+                                return new RecyclerViewHolderForm(holder);
+                        }
                     }
 
                     @Override
-                    public void onBindData(Context context, RecyclerView.ViewHolder holder, FormInfo item, final int recyclerPosition) {
-                        final RecyclerViewHolderForm viewHolder;
-                        viewHolder = (RecyclerViewHolderForm) holder;
-                        viewHolder.editText.setText(item.getText());
-                        viewHolder.textInputLayout.setHint(getString(item.getHint()));
-                        if (item.getImage() != 0) {
-                            with(getContext())
-                                    .load(item.getImage())
-                                    .into(viewHolder.icon);
+                    public void onBindData(Context context, RecyclerView.ViewHolder holder, FormInfo formItem, final int recyclerPosition) {
+                        switch (formItem.getInputType())
+                        {
+                            case Values.SPINNER:
+                                final RecyclerViewHolderFormSpinner viewHolderFormSpinner = (RecyclerViewHolderFormSpinner) holder;
+                                viewHolderFormSpinner.spinner.setAdapter(new SpinnerGenericAdapter<String>(getContext(), R.layout.spinner_row, Arrays.asList(Values.categories)) {
+                                    @Override
+                                    public View getCustomView(int position, View convertView, ViewGroup parent, List<String> items, int layoutResourceId) {
+                                        SpinnerViewHolder holder;
+                                        if (convertView == null)
+                                        {
+                                            LayoutInflater inflater = LayoutInflater.from(getContext());
+                                            convertView = inflater.inflate(layoutResourceId, parent, false);
+                                            holder = new SpinnerViewHolder(convertView);
+                                            holder.title1 = convertView.findViewById(R.id.text_title1);
+                                            holder.imageView = convertView.findViewById(R.id.image_view);
+                                            convertView.setTag(holder);
+                                        } else {
+                                            holder = (SpinnerViewHolder) convertView.getTag();
+                                        }
+                                        if (position < items.size())
+                                        {
+                                            String category = items.get(position);
+                                            holder.title1.setText(category);
+                                            Glide
+                                                    .with(getContext())
+                                                    .load(R.raw.photo_coffee_beans)
+                                                    .error(R.raw.photo_coffee_beans)
+                                                    .crossFade()
+                                                    .into(holder.imageView);
+                                        }
+                                        return convertView;
+                                    }
+                                });
+                                RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) viewHolderFormSpinner.spinner.getLayoutParams();
+                                layoutParams.setMarginEnd(getResources().getDimensionPixelSize(R.dimen.form_icon_margin_32));
+                                viewHolderFormSpinner.spinner.setLayoutParams(layoutParams);
+                                if (item != null)
+                                    viewHolderFormSpinner.spinner.setSelection(item.getIndexOfCategory());
+                                viewHolderFormSpinner.spinner.setOnTouchListener(new View.OnTouchListener() {
+                                    @Override
+                                    public boolean onTouch(View v, MotionEvent event) {
+                                        Utils.closeKeyboard(getActivity());
+                                        return false;
+                                    }
+                                });
+                                viewHolderFormSpinner.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                    @Override
+                                    public void onItemSelected(AdapterView<?> adapter, View v, int SpinnerPosition, long id) {
+                                        item.setCategoryByIndex(SpinnerPosition);
+                                    }
+
+                                    @Override
+                                    public void onNothingSelected(AdapterView<?> arg0) {
+
+                                    }
+                                });
+                                with(getContext())
+                                        .load(formItem.getImage())
+                                        .into(viewHolderFormSpinner.icon);
+                                break;
+                            case Values.TEXTFIElD:
+                                final RecyclerViewHolderForm viewHolder;
+                                viewHolder = (RecyclerViewHolderForm) holder;
+                                viewHolder.editText.setText(formItem.getText());
+                                viewHolder.textInputLayout.setHint(getString(formItem.getHint()));
+                                with(getContext())
+                                        .load(formItem.getImage())
+                                        .into(viewHolder.icon);
+                                viewHolder.editText.addTextChangedListener(new TextWatcher() {
+                                    @Override
+                                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                                    }
+
+                                    @Override
+                                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                                    }
+
+                                    @Override
+                                    public void afterTextChanged(Editable s) {
+                                        formList.get(recyclerPosition).setText(viewHolder.editText.getText().toString());
+                                    }
+                                });
                         }
-                        viewHolder.editText.addTextChangedListener(new TextWatcher() {
-                            @Override
-                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-                            }
-
-                            @Override
-                            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-                            }
-
-                            @Override
-                            public void afterTextChanged(Editable s) {
-                                formList.get(recyclerPosition).setText(viewHolder.editText.getText().toString());
-                            }
-                        });
                     }
 
                     @Override
@@ -318,17 +396,15 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
                     return;
                 }
                 item.setByList(formList);
-//              if (imageBoolean)
-//              {
-//                   String imageName = ImageUtils.saveImage(getActivity(), imageURI, item.getType(), item.getId(), item.getImageName());
-//                   item.setImageName(imageName);
-//               }
+                if (imageBoolean)
+                {
+                    ImageUtils.saveImage(getActivity(), imageURI, item);
+                }
                 SimpleDateFormat dateFormat = new SimpleDateFormat(getString(R.string.time_format));
                 item.setDateCreated(dateFormat.format(Calendar.getInstance().getTime()));
                 if(gps.canGetLocation()){
                     latitude = gps.getLatitude();
                     longitude = gps.getLongitude();
-                    Log.d(TAG, "save: " + latitude +" " + longitude);
                 }else{
                     gps.showSettingsAlert();
                 }
@@ -394,6 +470,11 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
         {
             case Values.ITEM:
                 toolbarTextView.startAnimation(AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.fade_out));
+                toolbarTextView.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+
+                    }
+                });
                 break;
         }
         Utils.closeKeyboard(getActivity());

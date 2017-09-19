@@ -16,16 +16,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.mrl.marketstall.R;
 import com.example.mrl.marketstall.adapter.RecyclerGenericAdapter;
 import com.example.mrl.marketstall.interfaces.Callbacks;
 import com.example.mrl.marketstall.model.Item;
 import com.example.mrl.marketstall.ui.Animations;
 import com.example.mrl.marketstall.ui.DividerItemDecoration;
+import com.example.mrl.marketstall.utils.ImageUtils;
 import com.example.mrl.marketstall.value.Values;
 import com.example.mrl.marketstall.view.fragments.FragmentDetails;
 import com.example.mrl.marketstall.view.fragments.FragmentForm;
 import com.example.mrl.marketstall.viewholder.RecyclerViewHolder;
+import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.google.firebase.database.DataSnapshot;
@@ -73,13 +76,13 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
 
     private void setupValues()
     {
-        fabMenu = (FloatingActionMenu) getActivity().findViewById(fab_menu);
-        fabAddItem = (FloatingActionButton) getActivity().findViewById(R.id.fab3);
-        fab2 = (FloatingActionButton) getActivity().findViewById(R.id.fab2);
-        fab1 = (FloatingActionButton) getActivity().findViewById(R.id.fab1);
+        fabMenu = getActivity().findViewById(fab_menu);
+        fabAddItem = getActivity().findViewById(R.id.fab3);
+        fab2 = getActivity().findViewById(R.id.fab2);
+        fab1 = getActivity().findViewById(R.id.fab1);
 
-        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
-        recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
+        swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
+        recyclerView = view.findViewById(R.id.recyclerView);
 
         recyclerType = getArguments().getString(Values.RECYCLER_TYPE);
         tabType = getArguments().getString(Values.TAB_TYPE);
@@ -185,7 +188,7 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
                 itemRecyclerGenericAdapter = new RecyclerGenericAdapter<Item>(getActivity(), items)
                 {
                     @Override
-                    public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, int viewType, OnRecyclerItemClicked onRecyclerItemClicked)
+                    public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, int viewType, OnRecyclerItemClicked onRecyclerItemClicked, List item)
                     {
                         LayoutInflater inflater = LayoutInflater.from(getContext());
                         View view = inflater.inflate(R.layout.recycler_row, parent, false);
@@ -198,13 +201,13 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
                         RecyclerViewHolder recyclerViewHolder = (RecyclerViewHolder) holder;
                         recyclerViewHolder.title1.setText(item.getName());
                         recyclerViewHolder.title2.setText(getString(R.string.text_date) + ": " + item.getDateCreated());
-
-//                        Glide
-//                                .with(context)
-//                                .load(ImageUtils.getBrewPhotoUri(context,item))
-//                                .error(R.raw.photo_coffee_cup)
-//                                .crossFade()
-//                                .into(recyclerViewHolder.circularImageView);
+                        Glide
+                                .with(context)
+                                .using(new FirebaseImageLoader())
+                                .load(ImageUtils.getImage(item))
+                                .error(R.raw.photo_coffee_cup)
+                                .crossFade()
+                                .into(recyclerViewHolder.circularImageView);
                     }
 
                     @Override
@@ -286,8 +289,9 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
         switch (recyclerType)
         {
             case Values.ITEM:
-                Animations.toolbarAnimation(getActivity(), R.anim.slide_left_out, R.anim.slide_right_in, R.raw.photo_pour_over, R.raw.photo_pour_over);
-                bundle.putString(Values.SELECTED_ITEM, items.get(position).getId());
+                Item item = items.get(position);
+                Animations.toolbarAnimation(getActivity(), R.anim.slide_left_out, R.anim.slide_right_in, ImageUtils.getImage(item), R.raw.photo_pour_over);
+                bundle.putString(Values.SELECTED_ITEM, item.getId());
                 bundle.putBoolean(Values.EDIT_VALUE, false);
                 bundle.putString(Values.DETAILS_TYPE, Values.ITEM);
                 FragmentDetails fragmentDetails = new FragmentDetails();
@@ -306,7 +310,7 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
     private void addItem()
     {
         Log.i(TAG, "addItem: ");
-        Animations.toolbarAnimation(getActivity(), R.anim.fade_out, R.anim.fade_in, R.raw.photo_pour_over, R.raw.photo_pour_over);
+        Animations.toolbarAnimation(getActivity(), R.anim.fade_out, R.anim.fade_in, null, R.raw.photo_pour_over);
         Bundle bundle = new Bundle();
         bundle.putString(Values.FORM_TYPE, Values.ITEM);
         bundle.putBoolean(Values.EDIT_VALUE, false);
