@@ -35,7 +35,7 @@ import com.example.mrl.marketstall.adapter.RecyclerGenericAdapter;
 import com.example.mrl.marketstall.adapter.SpinnerGenericAdapter;
 import com.example.mrl.marketstall.interfaces.Callbacks;
 import com.example.mrl.marketstall.interfaces.CallbacksTabEdit;
-import com.example.mrl.marketstall.model.FormInfo;
+import com.example.mrl.marketstall.model.ItemInfo;
 import com.example.mrl.marketstall.model.Item;
 import com.example.mrl.marketstall.utils.GPSTracker;
 import com.example.mrl.marketstall.utils.ImageUtils;
@@ -71,8 +71,9 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
     private RecyclerView recyclerViewForm;
     private DatabaseReference mDatabase;
     private DatabaseReference itemCloudEndPoint;
-    private double latitude;
-    private double longitude;
+    private RecyclerGenericAdapter<ItemInfo> formInfoRecyclerAdapter;
+    private float latitude;
+    private float longitude;
     private GPSTracker gps;
     private Item item;
     private String tabType;
@@ -80,7 +81,7 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
     private Uri imageURI;
     private boolean imageBoolean = false;
     private boolean showMenu = false;
-    private List<FormInfo> formList;
+    private List<ItemInfo> formList;
     private String formType;
 
     @Override
@@ -120,8 +121,8 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             if (dataSnapshot.exists()) {
                                 item = dataSnapshot.getValue(Item.class);
-                                for (FormInfo detail : item.detailsToForm()) {
-                                    if (detail.getShow()) {
+                                for (ItemInfo detail : item.detailsToForm()) {
+                                    if (detail.getShowForm()) {
                                         formList.add(detail);
                                     }
                                 }
@@ -137,8 +138,8 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
                 } else {
                     item = new Item();
                     item.setId(itemCloudEndPoint.push().getKey());
-                    for (FormInfo detail : item.detailsToForm()) {
-                        if (detail.getShow()) {
+                    for (ItemInfo detail : item.detailsToForm()) {
+                        if (detail.getShowForm()) {
                             formList.add(detail);
                         }
                     }
@@ -149,7 +150,7 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
     }
 
     private void setupToolbar() {
-        AppBarLayout appBarLayout = (AppBarLayout) getActivity().findViewById(R.id.app_bar_layout);
+        AppBarLayout appBarLayout = getActivity().findViewById(R.id.app_bar_layout);
         appBarLayout.setExpanded(true);
         toolbar.getMenu().clear();
         switch (formType) {
@@ -182,15 +183,14 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
     }
 
     private void setupRecyclerViewForm() {
-        RecyclerGenericAdapter<FormInfo> formInfoRecyclerAdapter = null;
         switch (formType) {
             case Values.ITEM:
-                formInfoRecyclerAdapter = new RecyclerGenericAdapter<FormInfo>(getActivity(), formList) {
+                formInfoRecyclerAdapter = new RecyclerGenericAdapter<ItemInfo>(getActivity(), formList) {
                     @Override
                     public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, int viewType, OnRecyclerItemClicked onRecyclerItemClicked, List items) {
                         final View holder;
-                        FormInfo formInfo = (FormInfo) items.get(viewType);
-                        switch (formInfo.getInputType())
+                        ItemInfo itemInfo = (ItemInfo) items.get(viewType);
+                        switch (itemInfo.getInputTypeForm())
                         {
                             case Values.SPINNER:
                                 holder = LayoutInflater.from(getActivity()).inflate(R.layout.recycler_row_spinner, parent, false);
@@ -208,8 +208,8 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
                     }
 
                     @Override
-                    public void onBindData(Context context, RecyclerView.ViewHolder holder, FormInfo formItem, final int recyclerPosition) {
-                        switch (formItem.getInputType())
+                    public void onBindData(Context context, RecyclerView.ViewHolder holder, ItemInfo itemInfo, final int recyclerPosition) {
+                        switch (itemInfo.getInputTypeForm())
                         {
                             case Values.SPINNER:
                                 final RecyclerViewHolderFormSpinner viewHolderFormSpinner = (RecyclerViewHolderFormSpinner) holder;
@@ -266,7 +266,7 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
                                     }
                                 });
                                 with(getContext())
-                                        .load(formItem.getImage())
+                                        .load(itemInfo.getImage())
                                         .into(viewHolderFormSpinner.icon);
                                 break;
                             case Values.RATING_BAR:
@@ -281,10 +281,10 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
                                 break;
                             case Values.TEXT_FIElD:
                                 final RecyclerViewHolderFormEditText viewHolderFormEditText = (RecyclerViewHolderFormEditText) holder;
-                                viewHolderFormEditText.editText.setText(formItem.getText());
-                                viewHolderFormEditText.textInputLayout.setHint(getString(formItem.getHint()));
+                                viewHolderFormEditText.editText.setText(itemInfo.getText());
+                                viewHolderFormEditText.textInputLayout.setHint(getString(itemInfo.getHint()));
                                 with(getContext())
-                                        .load(formItem.getImage())
+                                        .load(itemInfo.getImage())
                                         .into(viewHolderFormEditText.icon);
                                 viewHolderFormEditText.editText.addTextChangedListener(new TextWatcher() {
                                     @Override
@@ -417,12 +417,12 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
                 SimpleDateFormat dateFormat = new SimpleDateFormat(getString(R.string.time_format));
                 item.setDateCreated(dateFormat.format(Calendar.getInstance().getTime()));
                 if(gps.canGetLocation()){
-                    latitude = gps.getLatitude();
-                    longitude = gps.getLongitude();
+
+                    item.setLatitude((float) gps.getLatitude());
+                    item.setLongitude((float) gps.getLongitude());
                 }else{
                     gps.showSettingsAlert();
                 }
-                item.setLocation(longitude+","+latitude);
                 itemCloudEndPoint.child(item.getId()).setValue(item);
                 backPress();
                 break;

@@ -1,57 +1,51 @@
 package com.example.mrl.marketstall.view.fragments;
 
 import android.Manifest;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.example.mrl.marketstall.R;
+import com.example.mrl.marketstall.custom.WorkaroundMapFragment;
+import com.example.mrl.marketstall.model.Item;
 import com.github.clans.fab.FloatingActionMenu;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-/**
- * Created by MRL on 13-Sep-17.
- */
+import java.util.ArrayList;
+import java.util.List;
 
 public class FragmentMap extends Fragment {
 
     private final String TAG = getClass().getSimpleName();
-    private static int LOAD_IMAGE_RESULTS = 1;
-    private Bundle bundle;
     private View view;
     private Toolbar toolbar;
-    private ImageView toolbarImageViewMain;
-    private TextView toolbarTextView;
+    private DatabaseReference mDatabase;
+    private DatabaseReference itemCloudEndPoint;
     private FloatingActionMenu fabMenu;
-    private MapView mMapView;
-
+    private List<Item> items;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         view = inflater.inflate(R.layout.fragment_map, container, false);
-        bundle = savedInstanceState;
 
         setupValues();
         setupToolbar();
@@ -63,10 +57,26 @@ public class FragmentMap extends Fragment {
 
     private void setupValues() {
         toolbar = getActivity().findViewById(R.id.toolbar);
-        toolbarImageViewMain = getActivity().findViewById(R.id.toolbar_image_main);
-        toolbarTextView = getActivity().findViewById(R.id.toolbar_text_view);
         fabMenu = getActivity().findViewById(R.id.fab_menu);
-        mMapView = view.findViewById(R.id.mapView);
+        items = new ArrayList<>();
+        mDatabase =  FirebaseDatabase.getInstance().getReference();
+        itemCloudEndPoint = mDatabase.child("items");
+        itemCloudEndPoint.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                items.clear();
+                for (DataSnapshot itemSnapshot: dataSnapshot.getChildren()){
+                    Item item = itemSnapshot.getValue(Item.class);
+                    items.add(item);
+                }
+                setupMap();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG, databaseError.getMessage());
+            }
+        });
     }
 
     private void setupToolbar() {
@@ -81,67 +91,54 @@ public class FragmentMap extends Fragment {
         fabMenu.hideMenuButton(true);
     }
 
-    public void setupMap()
-    {
-        Log.d(TAG, "setupMap: " + mMapView);
-
-        mMapView.onCreate(bundle);
-        mMapView.onResume();
-        try {
-            MapsInitializer.initialize(getActivity().getApplicationContext());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        mMapView.getMapAsync(new OnMapReadyCallback() {
+    private void setupMap() {
+        final NestedScrollView nestedScrollView = getActivity().findViewById(R.id.nested_scroll_view);
+        WorkaroundMapFragment workaroundMapFragment = (WorkaroundMapFragment) getActivity().getFragmentManager().findFragmentById(R.id.map);
+        workaroundMapFragment.setListener(new WorkaroundMapFragment.OnTouchListener() {
             @Override
-            public void onMapReady(GoogleMap mMap) {
-                GoogleMap googleMap = mMap;
-
-                // For showing a move to my location button
-                if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    showSettingsAlert();
-                    return;
-                }
+            public void onTouch() {
+                nestedScrollView.requestDisallowInterceptTouchEvent(true);
+            }
+        });
+        workaroundMapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
                 googleMap.setMyLocationEnabled(true);
-
-                // For dropping a marker at a point on the Map
-                LatLng sydney = new LatLng(-34, 151);
-                googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker Title").snippet("Marker Description"));
-
-                // For zooming automatically to the location of the marker
-                CameraPosition cameraPosition = new CameraPosition.Builder().target(sydney).zoom(12).build();
-                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                for (Item item : items) {
+                    LatLng itemLocation = new LatLng(item.getLatitude(), item.getLongitude());
+                    if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        return;
+                    }
+                    googleMap.addMarker(new MarkerOptions().position(itemLocation).title(item.getName()));
+                }
+            }
+        });
+        nestedScrollView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                switch (motionEvent.getAction()) {
+                    case MotionEvent.ACTION_UP:
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        break;
+                }
+                return true;
             }
         });
     }
 
-    public void showSettingsAlert(){
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
-
-        // Setting Dialog Title
-        alertDialog.setTitle("GPS is settings");
-
-        // Setting Dialog Message
-        alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?");
-
-        // On pressing Settings button
-        alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog,int which) {
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                getActivity().startActivity(intent);
-            }
-        });
-
-        // on pressing cancel button
-        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        // Showing Alert Message
-        alertDialog.show();
+    @Override
+    public void onDestroyView()
+    {
+        Log.d(TAG, "onDestroyView: ");
+        super.onDestroyView();
+        Fragment workaroundMapFragment = getActivity().getSupportFragmentManager().findFragmentById(R.id.map);
+        if (workaroundMapFragment != null) {
+            getActivity().getSupportFragmentManager().beginTransaction().remove(workaroundMapFragment).commit();
+        }
+        Fragment fragment = getFragmentManager().findFragmentById(R.id.map);
+        if (workaroundMapFragment != null) {
+            getActivity().getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+        }
     }
-
 }

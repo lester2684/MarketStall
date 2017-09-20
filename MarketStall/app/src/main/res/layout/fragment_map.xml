@@ -6,9 +6,10 @@ android:layout_height="match_parent"
 android:orientation="vertical"
 tools:context=".view.fragments.FragmentMap">
 
-    <com.google.android.gms.maps.MapView
-        android:id="@+id/mapView"
+    <fragment
+        android:id="@+id/map"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        class="com.example.mrl.marketstall.custom.WorkaroundMapFragment"/>
 
 </RelativeLayout >

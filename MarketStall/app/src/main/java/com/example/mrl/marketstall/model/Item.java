@@ -16,36 +16,27 @@ public class Item
     private float quality_rating;
     private String userId;
     private String dateCreated;
-    private String location;
+    private float latitude;
+    private float longitude;
     private String imageName;
-
-    private int total_form_size;
 
     public Item()
     {
 
     }
 
-    public List<FormInfo> detailsToForm()
-    {
-        List<FormInfo> details = new ArrayList<>();
-        details.add(0, new FormInfo(name, R.raw.icon_name, R.string.text_name, true, Values.TEXT_FIElD));
-        details.add(1, new FormInfo(dateCreated, R.drawable.ic_date, R.string.text_date, false, Values.TEXT_FIElD));
-        details.add(2, new FormInfo(String.valueOf(price), R.raw.icon_price, R.string.text_price, true, Values.TEXT_FIElD));
-        details.add(3, new FormInfo(String.valueOf(location), R.drawable.ic_location, R.string.text_location, false, Values.TEXT_FIElD));
-        details.add(4, new FormInfo(String.valueOf(category), R.drawable.ic_location, R.string.text_category, true, Values.SPINNER));
-        details.add(5, new FormInfo(String.valueOf(quality_rating), R.drawable.ic_location, R.string.text_quality_rating, true, Values.RATING_BAR));
-
-        int count = 0;
-        for (FormInfo detail :details) {
-            if(detail.getShow())
-                count++;
-        }
-        total_form_size = count;
+    public List<ItemInfo> detailsToForm() {
+        List<ItemInfo> details = new ArrayList<>();
+        details.add(0, new ItemInfo(name, R.raw.icon_name, R.string.text_name, true, false, Values.TEXT_FIElD, Values.TEXT_VIEW));
+        details.add(1, new ItemInfo(dateCreated, R.drawable.ic_date, R.string.text_date, false, true, Values.TEXT_FIElD, Values.TEXT_VIEW));
+        details.add(2, new ItemInfo(String.valueOf(price), R.raw.icon_price, R.string.text_price, true, true, Values.TEXT_FIElD, Values.TEXT_VIEW));
+        details.add(3, new ItemInfo(String.valueOf(latitude) + "," + String.valueOf(longitude), R.drawable.ic_location, R.string.text_location, false, false, Values.TEXT_FIElD, Values.MAP_VIEW));
+        details.add(4, new ItemInfo(String.valueOf(category), R.drawable.ic_location, R.string.text_category, true, true, Values.SPINNER, Values.TEXT_VIEW));
+        details.add(5, new ItemInfo(String.valueOf(quality_rating), R.drawable.ic_location, R.string.text_quality_rating, true, true, Values.RATING_BAR, Values.TEXT_VIEW));
         return details;
     }
 
-    public void setByList(List<FormInfo> list)
+    public void setByList(List<ItemInfo> list)
     {
         this.name = list.get(0).getText();
         this.price = Double.parseDouble(list.get(1).getText());
@@ -83,14 +74,6 @@ public class Item
         this.price = price;
     }
 
-    public int getTotal_form_size() {
-        return total_form_size;
-    }
-
-    public void setTotal_form_size(int TOTAL_FORM_SIZE) {
-        this.total_form_size = TOTAL_FORM_SIZE;
-    }
-
     public void setUserId(String userId) {
         this.userId = userId;
     }
@@ -99,12 +82,12 @@ public class Item
         return userId;
     }
 
-    public String getLocation() {
-        return location;
+    public float getLatitude() {
+        return latitude;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public float getLongitude() {
+        return longitude;
     }
 
     public String getCategory() {
@@ -138,5 +121,13 @@ public class Item
     public void setCategoryByIndex(int categoryByIndex)
     {
         this.category = Values.categories[categoryByIndex];
+    }
+
+    public void setLatitude(float latitude) {
+        this.latitude = latitude;
+    }
+
+    public void setLongitude(float longitude) {
+        this.longitude = longitude;
     }
 }

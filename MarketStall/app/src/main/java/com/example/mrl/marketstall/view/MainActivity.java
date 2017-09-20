@@ -33,7 +33,6 @@ public class MainActivity extends RuntimePermissionsActivity implements View.OnC
     private Callbacks currentFragmentCallback;
     private Callbacks nextFragmentCallback;
     private ActionBarDrawerToggle toggle;
-    private int counter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -43,6 +42,7 @@ public class MainActivity extends RuntimePermissionsActivity implements View.OnC
         checkPermissions();
         setupToolbar();
         toRecycler();
+
     }
 
     @Override
@@ -53,16 +53,17 @@ public class MainActivity extends RuntimePermissionsActivity implements View.OnC
     {
         MainActivity.super.requestAppPermissions(Values.permissions, R.string.runtime_permissions_error_message, Values.permissionCode);
     }
+
     private void setupToolbar()
     {
-        AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
+        AppBarLayout appBarLayout = findViewById(R.id.app_bar_layout);
         appBarLayout.addOnOffsetChangedListener(this);
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        final Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener()
         {
@@ -163,7 +164,7 @@ public class MainActivity extends RuntimePermissionsActivity implements View.OnC
     @Override
     public void onBackPressed()
     {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         assert drawer != null;
 
         if (drawer.isDrawerOpen(GravityCompat.START))

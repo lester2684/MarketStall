@@ -21,6 +21,8 @@ public class Values
 
     public final static String TEXT_FIElD = "text";
     public final static String SPINNER = "spinner";
+    public final static String TEXT_VIEW = "text_view";
+    public final static String MAP_VIEW = "map_view";
     public final static String RATING_BAR = "rating_bar";
 
 }

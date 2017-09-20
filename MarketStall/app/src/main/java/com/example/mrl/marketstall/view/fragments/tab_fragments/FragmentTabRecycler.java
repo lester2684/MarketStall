@@ -349,7 +349,14 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
     public void onReturn(Fragment fromFragment, String fromTabType)
     {
         Log.i(TAG, "onReturn: from " + fromFragment.getClass().getSimpleName());
-
+        if (fromFragment instanceof FragmentForm)
+        {
+            Animations.toolbarAnimation(getActivity(), R.anim.fade_out, R.anim.fade_in, null, R.raw.photo_coffee_cherries);
+        }
+        else if (fromFragment instanceof FragmentDetails)
+        {
+            Animations.toolbarAnimation(getActivity(), R.anim.slide_right_out, R.anim.slide_left_in, null, R.raw.photo_coffee_cherries);
+        }
     }
 
     @Override

@@ -17,12 +17,23 @@ public class Animations
     {
         ImageView toolbarImageViewMain = activity.findViewById(R.id.toolbar_image_main);
         ImageView toolbarImageViewSecond = activity.findViewById(R.id.toolbar_image_second);
-        Glide
-                .with(activity)
-                .using(new FirebaseImageLoader())
-                .load(loadImage)
-                .error(errorImage)
-                .into(toolbarImageViewSecond);
+        if (loadImage == null )
+        {
+            Glide
+                    .with(activity)
+                    .load(errorImage)
+                    .error(errorImage)
+                    .into(toolbarImageViewSecond);
+        }
+        else
+        {
+            Glide
+                    .with(activity)
+                    .using(new FirebaseImageLoader())
+                    .load(loadImage)
+                    .error(errorImage)
+                    .into(toolbarImageViewSecond);
+        }
         toolbarImageViewMain.startAnimation(AnimationUtils.loadAnimation(activity, out));
         toolbarImageViewSecond.startAnimation(AnimationUtils.loadAnimation(activity, in));
         toolbarImageViewSecond.setId(R.id.toolbar_image_main);
