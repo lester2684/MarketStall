@@ -179,7 +179,7 @@ public class FragmentDetails extends Fragment implements Callbacks
             @Override
             public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, int viewType, OnRecyclerItemClicked onRecyclerItemClicked, List item)
             {
-                final View view = LayoutInflater.from(getActivity()).inflate(R.layout.recycler_row_details, parent, false);
+                final View view = LayoutInflater.from(getActivity()).inflate(R.layout.recycler_row_details_text_view, parent, false);
                 return new RecyclerViewHolderDetails(view);
             }
 

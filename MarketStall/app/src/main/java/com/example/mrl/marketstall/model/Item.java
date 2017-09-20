@@ -13,7 +13,7 @@ public class Item
     private String name;
     private String category;
     private double price;
-    private double quality_rating;
+    private float quality_rating;
     private String userId;
     private String dateCreated;
     private String location;
@@ -29,12 +29,12 @@ public class Item
     public List<FormInfo> detailsToForm()
     {
         List<FormInfo> details = new ArrayList<>();
-        details.add(0, new FormInfo(name, R.raw.icon_name, R.string.text_name, true, Values.TEXTFIElD));
-        details.add(1, new FormInfo(dateCreated, R.drawable.ic_date, R.string.text_date, false, Values.TEXTFIElD));
-        details.add(2, new FormInfo(String.valueOf(price), R.raw.icon_price, R.string.text_price, true, Values.TEXTFIElD));
-        details.add(3, new FormInfo(String.valueOf(location), R.drawable.ic_location, R.string.text_location, false, Values.TEXTFIElD));
+        details.add(0, new FormInfo(name, R.raw.icon_name, R.string.text_name, true, Values.TEXT_FIElD));
+        details.add(1, new FormInfo(dateCreated, R.drawable.ic_date, R.string.text_date, false, Values.TEXT_FIElD));
+        details.add(2, new FormInfo(String.valueOf(price), R.raw.icon_price, R.string.text_price, true, Values.TEXT_FIElD));
+        details.add(3, new FormInfo(String.valueOf(location), R.drawable.ic_location, R.string.text_location, false, Values.TEXT_FIElD));
         details.add(4, new FormInfo(String.valueOf(category), R.drawable.ic_location, R.string.text_category, true, Values.SPINNER));
-        details.add(5, new FormInfo(String.valueOf(quality_rating), R.drawable.ic_location, R.string.text_quality_rating, true, Values.TEXTFIElD));
+        details.add(5, new FormInfo(String.valueOf(quality_rating), R.drawable.ic_location, R.string.text_quality_rating, true, Values.RATING_BAR));
 
         int count = 0;
         for (FormInfo detail :details) {
@@ -115,7 +115,7 @@ public class Item
         return Arrays.asList(Values.categories).indexOf(category);
     }
 
-    public double getQuality_rating() {
+    public float getQuality_rating() {
         return quality_rating;
     }
 
@@ -123,7 +123,7 @@ public class Item
         this.category = category;
     }
 
-    public void setQuality_rating(double quality_rating) {
+    public void setQuality_rating(float quality_rating) {
         this.quality_rating = quality_rating;
     }
 

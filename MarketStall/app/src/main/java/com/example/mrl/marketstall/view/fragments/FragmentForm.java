@@ -25,6 +25,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -40,7 +41,8 @@ import com.example.mrl.marketstall.utils.GPSTracker;
 import com.example.mrl.marketstall.utils.ImageUtils;
 import com.example.mrl.marketstall.utils.Utils;
 import com.example.mrl.marketstall.value.Values;
-import com.example.mrl.marketstall.viewholder.RecyclerViewHolderForm;
+import com.example.mrl.marketstall.viewholder.RecyclerViewHolderFormEditText;
+import com.example.mrl.marketstall.viewholder.RecyclerViewHolderFormRatingBar;
 import com.example.mrl.marketstall.viewholder.RecyclerViewHolderFormSpinner;
 import com.example.mrl.marketstall.viewholder.SpinnerViewHolder;
 import com.github.clans.fab.FloatingActionMenu;
@@ -193,12 +195,15 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
                             case Values.SPINNER:
                                 holder = LayoutInflater.from(getActivity()).inflate(R.layout.recycler_row_spinner, parent, false);
                                 return new RecyclerViewHolderFormSpinner(holder);
-                            case Values.TEXTFIElD:
-                                holder = LayoutInflater.from(getActivity()).inflate(R.layout.recycler_row_form, parent, false);
-                                return new RecyclerViewHolderForm(holder);
+                            case Values.TEXT_FIElD:
+                                holder = LayoutInflater.from(getActivity()).inflate(R.layout.recycler_row_form_edit_text, parent, false);
+                                return new RecyclerViewHolderFormEditText(holder);
+                            case Values.RATING_BAR:
+                                holder = LayoutInflater.from(getActivity()).inflate(R.layout.recycler_row_rating_bar, parent, false);
+                                return new RecyclerViewHolderFormRatingBar(holder);
                             default:
-                                holder = LayoutInflater.from(getActivity()).inflate(R.layout.recycler_row_form, parent, false);
-                                return new RecyclerViewHolderForm(holder);
+                                holder = LayoutInflater.from(getActivity()).inflate(R.layout.recycler_row_form_edit_text, parent, false);
+                                return new RecyclerViewHolderFormEditText(holder);
                         }
                     }
 
@@ -264,15 +269,24 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
                                         .load(formItem.getImage())
                                         .into(viewHolderFormSpinner.icon);
                                 break;
-                            case Values.TEXTFIElD:
-                                final RecyclerViewHolderForm viewHolder;
-                                viewHolder = (RecyclerViewHolderForm) holder;
-                                viewHolder.editText.setText(formItem.getText());
-                                viewHolder.textInputLayout.setHint(getString(formItem.getHint()));
+                            case Values.RATING_BAR:
+                                final RecyclerViewHolderFormRatingBar viewHolderFormRatingBar = (RecyclerViewHolderFormRatingBar) holder;
+                                viewHolderFormRatingBar.ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+                                    public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
+                                        item.setQuality_rating(rating);
+                                    }
+                                });
+                                if (item != null)
+                                    viewHolderFormRatingBar.ratingBar.setRating(item.getQuality_rating());
+                                break;
+                            case Values.TEXT_FIElD:
+                                final RecyclerViewHolderFormEditText viewHolderFormEditText = (RecyclerViewHolderFormEditText) holder;
+                                viewHolderFormEditText.editText.setText(formItem.getText());
+                                viewHolderFormEditText.textInputLayout.setHint(getString(formItem.getHint()));
                                 with(getContext())
                                         .load(formItem.getImage())
-                                        .into(viewHolder.icon);
-                                viewHolder.editText.addTextChangedListener(new TextWatcher() {
+                                        .into(viewHolderFormEditText.icon);
+                                viewHolderFormEditText.editText.addTextChangedListener(new TextWatcher() {
                                     @Override
                                     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -285,7 +299,7 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
 
                                     @Override
                                     public void afterTextChanged(Editable s) {
-                                        formList.get(recyclerPosition).setText(viewHolder.editText.getText().toString());
+                                        formList.get(recyclerPosition).setText(viewHolderFormEditText.editText.getText().toString());
                                     }
                                 });
                         }

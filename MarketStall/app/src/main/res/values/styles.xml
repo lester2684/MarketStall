@@ -28,4 +28,9 @@
     <style name="TutorialText" parent="TextAppearance.ShowcaseView.Detail.Light">
         <item name="android:textColor">@color/tutorialText</item>
     </style>
+
+    <style name="RatingBar" parent="Theme.AppCompat">
+        <item name="colorControlNormal">@color/accent</item>
+        <item name="colorControlActivated">@color/accent_light</item>
+    </style>
 </resources>

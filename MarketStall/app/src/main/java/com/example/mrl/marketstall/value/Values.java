@@ -19,7 +19,8 @@ public class Values
     public final static String TAB_ITEM_EDIT = "item_edit";
     public final static String TAB_ITEM_NEW = "item_new";
 
-    public final static String TEXTFIElD = "text";
+    public final static String TEXT_FIElD = "text";
     public final static String SPINNER = "spinner";
+    public final static String RATING_BAR = "rating_bar";
 
 }

@@ -8,13 +8,13 @@ import android.widget.ImageView;
 
 import com.example.mrl.marketstall.R;
 
-public class RecyclerViewHolderForm extends RecyclerView.ViewHolder
+public class RecyclerViewHolderFormEditText extends RecyclerView.ViewHolder
 {
     public ImageView icon;
     public TextInputLayout textInputLayout;
     public EditText editText;
 
-    public RecyclerViewHolderForm(final View itemView)
+    public RecyclerViewHolderFormEditText(final View itemView)
     {
         super(itemView);
         icon = (ImageView) itemView.findViewById(R.id.icon);
