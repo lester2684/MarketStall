@@ -1,34 +1,42 @@
 package com.example.mrl.marketstall.view.fragments;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.mrl.marketstall.R;
 import com.example.mrl.marketstall.adapter.RecyclerGenericAdapter;
+import com.example.mrl.marketstall.custom.WorkaroundMapFragment;
 import com.example.mrl.marketstall.interfaces.Callbacks;
-import com.example.mrl.marketstall.model.FormInfo;
 import com.example.mrl.marketstall.model.Item;
+import com.example.mrl.marketstall.model.ItemInfo;
 import com.example.mrl.marketstall.ui.Animations;
 import com.example.mrl.marketstall.utils.ImageUtils;
 import com.example.mrl.marketstall.value.Values;
-import com.example.mrl.marketstall.viewholder.RecyclerViewHolderDetails;
-import com.firebase.ui.storage.images.FirebaseImageLoader;
+import com.example.mrl.marketstall.viewholder.RecyclerViewHolderDetailTextView;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -38,10 +46,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.bumptech.glide.Glide.with;
-
-public class FragmentDetails extends Fragment implements Callbacks
-{
+public class FragmentDetails extends Fragment implements Callbacks {
     private final String TAG = getClass().getSimpleName();
     private View view;
     private Toolbar toolbar;
@@ -49,52 +54,52 @@ public class FragmentDetails extends Fragment implements Callbacks
     private FloatingActionMenu fabMenu;
     private FloatingActionButton fabEdit;
     private FloatingActionButton fabDelete;
-    private TextView addInfoButton;
     private RecyclerView recyclerViewDetails;
-    private RecyclerGenericAdapter<FormInfo> detailsInfoRecyclerAdapter;
+    private RecyclerGenericAdapter<ItemInfo> detailsInfoRecyclerAdapter;
     private DatabaseReference mDatabase;
     private DatabaseReference itemCloudEndPoint;
     private Item item;
     private boolean showMenu = false;
-    private List<FormInfo> detailsList;
+    private List<ItemInfo> detailsList;
     private String detailsType;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-    {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         view = inflater.inflate(R.layout.fragment_details, container, false);
 
         setupValues();
         setupToolbar();
         setupFAB();
-
         return view;
     }
 
-    private void setupValues()
-    {
+    private void setupValues() {
         toolbar = getActivity().findViewById(R.id.toolbar);
         collapsingToolbarLayout = getActivity().findViewById(R.id.collapsing_toolbar_layout);
         fabMenu = getActivity().findViewById(R.id.fab_menu);
         fabEdit = getActivity().findViewById(R.id.fab2);
         fabDelete = getActivity().findViewById(R.id.fab3);
-        addInfoButton = view.findViewById(R.id.button_add_info);
         recyclerViewDetails = view.findViewById(R.id.recyclerViewDetails);
 
         detailsType = getArguments().getString(Values.DETAILS_TYPE);
 
-        mDatabase =  FirebaseDatabase.getInstance().getReference();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
         itemCloudEndPoint = mDatabase.child("items");
         itemCloudEndPoint.child(getArguments().getString(Values.SELECTED_ITEM)).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     item = dataSnapshot.getValue(Item.class);
-                    updateListDetails();
+                    detailsList = new ArrayList<>();
+                    for (ItemInfo detail : item.detailsToForm()) {
+                        if (detail.getShowDetail()) {
+                            detailsList.add(detail);
+                        }
+                    }
                     collapsingToolbarLayout.setTitle(item.getName());
-                    setupView();
                     setupRecyclerViewDetails();
+                    setupMap();
                 }
             }
 
@@ -105,106 +110,74 @@ public class FragmentDetails extends Fragment implements Callbacks
         });
     }
 
-    private void setupToolbar()
-    {
+    private void setupToolbar() {
         AppBarLayout appBarLayout = getActivity().findViewById(R.id.app_bar_layout);
         appBarLayout.setExpanded(true);
         toolbar.getMenu().clear();
     }
 
-    private void setupFAB()
-    {
-        fabMenu.setOnMenuButtonClickListener(new View.OnClickListener()
-        {
+    private void setupFAB() {
+        fabMenu.setOnMenuButtonClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
-                if (fabMenu.isOpened())
-                {
+            public void onClick(View v) {
+                if (fabMenu.isOpened()) {
                     fabMenu.close(true);
-                }
-                else
-                {
+                } else {
                     fabMenu.open(true);
                 }
             }
         });
-        if (fabMenu.isOpened())
-        {
+        if (fabMenu.isOpened()) {
             fabMenu.close(true);
             int delay = getResources().getInteger(R.integer.fab_delay);
 
-            new Handler().postDelayed(new Runnable()
-            {
+            new Handler().postDelayed(new Runnable() {
                 @Override
-                public void run()
-                {
+                public void run() {
                     setFAB();
                 }
             }, delay);
-        }
-        else
-        {
+        } else {
             setFAB();
         }
     }
 
-    private void setupView()
-    {
-        int total_form_size=0;
-        switch (detailsType)
-        {
-            case Values.ITEM:
-                total_form_size = item.getTotal_form_size();
-                break;
-        }
-        if (detailsList.size() < total_form_size )
-        {
-            addInfoButton.setVisibility(View.VISIBLE);
-            addInfoButton.setOnClickListener(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View v)
-                {
-                    edit();
-                }
-            });
-        }
-    }
-
-    private void setupRecyclerViewDetails()
-    {
-        detailsInfoRecyclerAdapter = new RecyclerGenericAdapter<FormInfo>(getActivity() , detailsList)
-        {
+    private void setupRecyclerViewDetails() {
+        detailsInfoRecyclerAdapter = new RecyclerGenericAdapter<ItemInfo>(getActivity(), detailsList) {
             @Override
-            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, int viewType, OnRecyclerItemClicked onRecyclerItemClicked, List item)
-            {
-                final View view = LayoutInflater.from(getActivity()).inflate(R.layout.recycler_row_details_text_view, parent, false);
-                return new RecyclerViewHolderDetails(view);
+            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, int viewType, OnRecyclerItemClicked onRecyclerItemClicked, List items) {
+                final View holder;
+                ItemInfo itemInfo = (ItemInfo) items.get(viewType);
+                switch (itemInfo.getDetailViewType()) {
+                    case Values.TEXT_VIEW:
+                        holder = LayoutInflater.from(getActivity()).inflate(R.layout.recycler_row_details_text_view, parent, false);
+                        return new RecyclerViewHolderDetailTextView(holder);
+                    default:
+                        holder = LayoutInflater.from(getActivity()).inflate(R.layout.recycler_row_details_text_view, parent, false);
+                        return new RecyclerViewHolderDetailTextView(holder);
+                }
             }
 
             @Override
-            public void onBindData(Context context, RecyclerView.ViewHolder holder, FormInfo item, int position)
-            {
-                RecyclerViewHolderDetails viewHolder = (RecyclerViewHolderDetails) holder;
-                viewHolder.text.setText(item.getText());
-                if (item.getImage() != 0)
-                {
-                    with(getContext())
-                            .load(item.getImage())
-                            .into(viewHolder.icon);
+            public void onBindData(Context context, RecyclerView.ViewHolder holder, ItemInfo itemInfo, int position) {
+                switch (itemInfo.getDetailViewType()) {
+                    case Values.TEXT_VIEW:
+                        RecyclerViewHolderDetailTextView recyclerViewHolderDetailTextView = (RecyclerViewHolderDetailTextView) holder;
+                        recyclerViewHolderDetailTextView.text.setText(itemInfo.getText());
+                        if (itemInfo.getImage() != 0) {
+                            Glide.with(getContext())
+                                    .load(itemInfo.getImage())
+                                    .into(recyclerViewHolderDetailTextView.icon);
+                        }
+                        break;
                 }
-                updateToolbarImage();
             }
 
             @Override
-            public OnRecyclerItemClicked onGetRecyclerItemClickListener()
-            {
-                return new OnRecyclerItemClicked()
-                {
+            public OnRecyclerItemClicked onGetRecyclerItemClickListener() {
+                return new OnRecyclerItemClicked() {
                     @Override
-                    public void onItemClicked(View view, int position)
-                    {
+                    public void onItemClicked(View view, int position) {
 
                     }
                 };
@@ -212,18 +185,16 @@ public class FragmentDetails extends Fragment implements Callbacks
         };
         recyclerViewDetails.setAdapter(detailsInfoRecyclerAdapter);
         recyclerViewDetails.setHasFixedSize(true);
-        recyclerViewDetails.setLayoutManager(new GridLayoutManager(getActivity(),2));
+        recyclerViewDetails.setLayoutManager(new GridLayoutManager(getActivity(), 2));
     }
 
-    private void setFAB()
-    {
+    private void setFAB() {
         fabEdit.setVisibility(View.INVISIBLE);
         fabEdit.setImageDrawable(getResources().getDrawable(R.drawable.ic_edit, getActivity().getTheme()));
         fabEdit.setLabelText(getString(R.string.button_edit));
         fabEdit.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
+            public void onClick(View v) {
                 edit();
             }
         });
@@ -233,61 +204,68 @@ public class FragmentDetails extends Fragment implements Callbacks
         fabDelete.setLabelText(getString(R.string.button_delete));
         fabDelete.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
+            public void onClick(View v) {
                 delete();
             }
         });
 
-        if(!fabMenu.isShown())
-        {
+        if (!fabMenu.isShown()) {
             showFabMenu();
         }
     }
 
-    private void showFabMenu()
-    {
-        if (fabMenu.getVisibility() == View.INVISIBLE)
-        {
+    private void setupMap() {
+        final NestedScrollView nestedScrollView = getActivity().findViewById(R.id.nested_scroll_view);
+        WorkaroundMapFragment workaroundMapFragment = (WorkaroundMapFragment) getActivity().getFragmentManager().findFragmentById(R.id.map);
+        workaroundMapFragment.setListener(new WorkaroundMapFragment.OnTouchListener() {
+            @Override
+            public void onTouch() {
+                nestedScrollView.requestDisallowInterceptTouchEvent(true);
+            }
+        });
+        workaroundMapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                LatLng itemLocation = new LatLng(item.getLatitude(), item.getLongitude());
+                if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    return;
+                }
+                googleMap.setMyLocationEnabled(true);
+                googleMap.addMarker(new MarkerOptions().position(itemLocation).title(item.getName()));
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(itemLocation,15));
+            }
+        });
+        nestedScrollView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                switch (motionEvent.getAction()) {
+                    case MotionEvent.ACTION_UP:
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        break;
+                }
+                return true;
+            }
+        });
+    }
+
+    private void showFabMenu() {
+        if (fabMenu.getVisibility() == View.INVISIBLE) {
             fabMenu.setVisibility(View.VISIBLE);
             int delay = 1000;
             fabMenu.hideMenuButton(false);
-            new Handler().postDelayed(new Runnable()
-            {
+            new Handler().postDelayed(new Runnable() {
                 @Override
-                public void run()
-                {
+                public void run() {
                     fabMenu.showMenuButton(true);
                 }
             }, delay);
         }
     }
 
-    private void updateListDetails()
-    {
-        List<FormInfo> formInfos = new ArrayList<>();
-        detailsList = new ArrayList<>();
-        switch (detailsType)
-        {
-            case Values.ITEM:
-                formInfos = item.detailsToForm();
-                formInfos = formInfos.subList(1, formInfos.size());
-                break;
-        }
-        for (int i = 0; i < formInfos.size(); i++)
-        {
-            if (!formInfos.get(i).getText().trim().isEmpty() && !formInfos.get(i).getText().equals("0.0"))
-            {
-                detailsList.add(formInfos.get(i));
-            }
-        }
-    }
-
-    private void delete()
-    {
+    private void delete() {
         Log.i(TAG, "delete: ");
-        switch (detailsType)
-        {
+        switch (detailsType) {
             case Values.ITEM:
                 ImageUtils.deleteImage(getActivity(), item);
                 itemCloudEndPoint.child(item.getId()).setValue(null);
@@ -295,12 +273,10 @@ public class FragmentDetails extends Fragment implements Callbacks
         backPress();
     }
 
-    private void edit()
-    {
+    private void edit() {
         Log.i(TAG, "edit: ");
         Bundle bundle = new Bundle();
-        switch (detailsType)
-        {
+        switch (detailsType) {
             case Values.ITEM:
                 bundle.putString(Values.FORM_TYPE, Values.ITEM);
                 bundle.putString(Values.SELECTED_ITEM, item.getId());
@@ -320,33 +296,19 @@ public class FragmentDetails extends Fragment implements Callbacks
 
     }
 
-    private void updateToolbarImage()
-    {
-        if(item != null) {
-            ImageView toolbarImageViewMain = getActivity().findViewById(R.id.toolbar_image_main);
-            Glide
-                    .with(getActivity())
-                    .using(new FirebaseImageLoader())
-                    .load(ImageUtils.getImage(item))
-                    .error(R.raw.photo_pour_over)
-                    .into(toolbarImageViewMain);
-        }
-    }
-
     public String getDetailsType() {
+
         return detailsType;
     }
 
     @Override
-    public String getTAG()
-    {
+    public String getTAG() {
 
         return TAG;
     }
 
     @Override
-    public void backPress()
-    {
+    public void backPress() {
         getActivity().onBackPressed();
 
     }
@@ -357,39 +319,46 @@ public class FragmentDetails extends Fragment implements Callbacks
     }
 
     @Override
-    public void onResume()
-    {
+    public void onResume() {
         Log.i(TAG, "onResume: ");
-        updateToolbarImage();
         super.onResume();
     }
 
     @Override
-    public void onPause()
+    public void onDestroyView()
     {
+        Log.d(TAG, "onDestroyView: ");
+        super.onDestroyView();
+        Fragment workaroundMapFragment = getActivity().getSupportFragmentManager().findFragmentById(R.id.map);
+        if (workaroundMapFragment != null) {
+            getActivity().getSupportFragmentManager().beginTransaction().remove(workaroundMapFragment).commit();
+        }
+        Fragment fragment = getFragmentManager().findFragmentById(R.id.map);
+        if (workaroundMapFragment != null) {
+            getActivity().getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+        }
+    }
+
+    @Override
+    public void onPause() {
         Log.i(TAG, "onPause: ");
         super.onPause();
-        if (fabMenu.isOpened())
-        {
+        if (fabMenu.isOpened()) {
             fabMenu.close(true);
         }
     }
 
     @Override
-    public void onBackPressedCallback()
-    {
+    public void onBackPressedCallback() {
         Log.i(TAG, "backButtonWasPressed: ");
 
     }
 
     @Override
-    public void onReturn(Fragment fromFragment, String fromTabType)
-    {
+    public void onReturn(Fragment fromFragment, String fromTabType) {
         Log.i(TAG, "onReturn: ");
-        if (fromFragment instanceof FragmentTabHost)
-        {
-            switch (detailsType)
-            {
+        if (fromFragment instanceof FragmentTabHost) {
+            switch (detailsType) {
                 case Values.ITEM:
                     Animations.toolbarAnimation(getActivity(), R.anim.slide_right_out, R.anim.slide_left_in, ImageUtils.getImage(item), R.raw.photo_coffee_beans);
                     break;
@@ -399,21 +368,17 @@ public class FragmentDetails extends Fragment implements Callbacks
     }
 
     @Override
-    public void toolbarExpanded()
-    {
+    public void toolbarExpanded() {
         fabMenu.showMenuButton(true);
-        if (showMenu)
-        {
+        if (showMenu) {
             showMenu = false;
         }
     }
 
     @Override
-    public void toolbarCollapsed()
-    {
+    public void toolbarCollapsed() {
         fabMenu.hideMenuButton(true);
-        if (!showMenu)
-        {
+        if (!showMenu) {
             showMenu = true;
         }
     }
