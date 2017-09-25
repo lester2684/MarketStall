@@ -433,7 +433,6 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
     public void delete()
     {
         Log.i(TAG, "deleteCoffee: ");
-//        ImageUtils.deleteImage(getActivity(), brew.getImageName());
         itemCloudEndPoint.child(item.getId()).removeValue();
     }
 

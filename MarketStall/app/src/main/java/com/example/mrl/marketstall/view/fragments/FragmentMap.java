@@ -41,12 +41,12 @@ public class FragmentMap extends Fragment {
     private DatabaseReference itemCloudEndPoint;
     private FloatingActionMenu fabMenu;
     private List<Item> items;
+    private WorkaroundMapFragment workaroundMapFragment;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         view = inflater.inflate(R.layout.fragment_map, container, false);
-
         setupValues();
         setupToolbar();
         setupFAB();
@@ -93,7 +93,11 @@ public class FragmentMap extends Fragment {
 
     private void setupMap() {
         final NestedScrollView nestedScrollView = getActivity().findViewById(R.id.nested_scroll_view);
-        WorkaroundMapFragment workaroundMapFragment = (WorkaroundMapFragment) getActivity().getFragmentManager().findFragmentById(R.id.map);
+        workaroundMapFragment = new WorkaroundMapFragment();
+        getChildFragmentManager()
+                .beginTransaction()
+                .replace(R.id.map_fragment_container1, workaroundMapFragment, workaroundMapFragment.getTAG())
+                .commitAllowingStateLoss();
         workaroundMapFragment.setListener(new WorkaroundMapFragment.OnTouchListener() {
             @Override
             public void onTouch() {
@@ -128,17 +132,8 @@ public class FragmentMap extends Fragment {
     }
 
     @Override
-    public void onDestroyView()
-    {
-        Log.d(TAG, "onDestroyView: ");
-        super.onDestroyView();
-        Fragment workaroundMapFragment = getActivity().getSupportFragmentManager().findFragmentById(R.id.map);
-        if (workaroundMapFragment != null) {
-            getActivity().getSupportFragmentManager().beginTransaction().remove(workaroundMapFragment).commit();
-        }
-        Fragment fragment = getFragmentManager().findFragmentById(R.id.map);
-        if (workaroundMapFragment != null) {
-            getActivity().getSupportFragmentManager().beginTransaction().remove(fragment).commit();
-        }
+    public void onPause() {
+        Log.d(TAG, "onPause: ");
+        super.onPause();
     }
 }

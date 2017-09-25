@@ -54,10 +54,10 @@ public class FragmentTabHost extends Fragment implements Callbacks
 
     private void setupValues()
     {
-        toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
-        fabMenu = (FloatingActionMenu) getActivity().findViewById(R.id.fab_menu);
-        viewPager = (ViewPager) view.findViewById(R.id.view_pager);
-        tabLayout = (TabLayout) view.findViewById(R.id.tab_layout);
+        toolbar = getActivity().findViewById(R.id.toolbar);
+        fabMenu = getActivity().findViewById(R.id.fab_menu);
+        viewPager = view.findViewById(R.id.view_pager);
+        tabLayout = view.findViewById(R.id.tab_layout);
 
         bundle = getArguments();
 
@@ -73,7 +73,7 @@ public class FragmentTabHost extends Fragment implements Callbacks
 
     private void setupToolbar()
     {
-        AppBarLayout appBarLayout = (AppBarLayout) getActivity().findViewById(R.id.app_bar_layout);
+        AppBarLayout appBarLayout = getActivity().findViewById(R.id.app_bar_layout);
         appBarLayout.setExpanded(true);
         toolbar.getMenu().clear();
     }

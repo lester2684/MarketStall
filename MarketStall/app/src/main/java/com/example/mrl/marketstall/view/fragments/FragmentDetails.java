@@ -62,6 +62,7 @@ public class FragmentDetails extends Fragment implements Callbacks {
     private boolean showMenu = false;
     private List<ItemInfo> detailsList;
     private String detailsType;
+    private WorkaroundMapFragment workaroundMapFragment;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -215,11 +216,15 @@ public class FragmentDetails extends Fragment implements Callbacks {
     }
 
     private void setupMap() {
-        final NestedScrollView nestedScrollView = getActivity().findViewById(R.id.nested_scroll_view);
-        WorkaroundMapFragment workaroundMapFragment = (WorkaroundMapFragment) getActivity().getFragmentManager().findFragmentById(R.id.map);
+        workaroundMapFragment = new WorkaroundMapFragment();
+        getChildFragmentManager()
+                .beginTransaction()
+                .replace(R.id.map_fragment_container2, workaroundMapFragment, workaroundMapFragment.getTAG())
+                .commitAllowingStateLoss();
         workaroundMapFragment.setListener(new WorkaroundMapFragment.OnTouchListener() {
             @Override
             public void onTouch() {
+                NestedScrollView nestedScrollView = getActivity().findViewById(R.id.nested_scroll_view);
                 nestedScrollView.requestDisallowInterceptTouchEvent(true);
             }
         });
@@ -235,6 +240,7 @@ public class FragmentDetails extends Fragment implements Callbacks {
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(itemLocation,15));
             }
         });
+        NestedScrollView nestedScrollView = getActivity().findViewById(R.id.nested_scroll_view);
         nestedScrollView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -322,21 +328,6 @@ public class FragmentDetails extends Fragment implements Callbacks {
     public void onResume() {
         Log.i(TAG, "onResume: ");
         super.onResume();
-    }
-
-    @Override
-    public void onDestroyView()
-    {
-        Log.d(TAG, "onDestroyView: ");
-        super.onDestroyView();
-        Fragment workaroundMapFragment = getActivity().getSupportFragmentManager().findFragmentById(R.id.map);
-        if (workaroundMapFragment != null) {
-            getActivity().getSupportFragmentManager().beginTransaction().remove(workaroundMapFragment).commit();
-        }
-        Fragment fragment = getFragmentManager().findFragmentById(R.id.map);
-        if (workaroundMapFragment != null) {
-            getActivity().getSupportFragmentManager().beginTransaction().remove(fragment).commit();
-        }
     }
 
     @Override
