@@ -17,8 +17,11 @@ import android.view.ViewGroup;
 
 import com.example.mrl.marketstall.R;
 import com.example.mrl.marketstall.custom.WorkaroundMapFragment;
+import com.example.mrl.marketstall.interfaces.Callbacks;
 import com.example.mrl.marketstall.model.Item;
+import com.example.mrl.marketstall.utils.GPSTracker;
 import com.github.clans.fab.FloatingActionMenu;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
@@ -32,7 +35,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FragmentMap extends Fragment {
+public class FragmentMap extends Fragment implements Callbacks {
 
     private final String TAG = getClass().getSimpleName();
     private View view;
@@ -41,6 +44,8 @@ public class FragmentMap extends Fragment {
     private DatabaseReference itemCloudEndPoint;
     private FloatingActionMenu fabMenu;
     private List<Item> items;
+    private GPSTracker gps;
+    private LatLng currentLocation;
     private WorkaroundMapFragment workaroundMapFragment;
 
     @Override
@@ -59,6 +64,14 @@ public class FragmentMap extends Fragment {
         toolbar = getActivity().findViewById(R.id.toolbar);
         fabMenu = getActivity().findViewById(R.id.fab_menu);
         items = new ArrayList<>();
+
+        gps = new GPSTracker(getActivity());
+        if(gps.canGetLocation()){
+            currentLocation = new LatLng(gps.getLatitude(), gps.getLongitude());
+        }else{
+            gps.showSettingsAlert();
+        }
+
         mDatabase =  FirebaseDatabase.getInstance().getReference();
         itemCloudEndPoint = mDatabase.child("items");
         itemCloudEndPoint.addValueEventListener(new ValueEventListener() {
@@ -84,7 +97,7 @@ public class FragmentMap extends Fragment {
         appBarLayout.setExpanded(true);
         toolbar.getMenu().clear();
         CollapsingToolbarLayout collapsingToolbarLayout = getActivity().findViewById(R.id.collapsing_toolbar_layout);
-        collapsingToolbarLayout.setTitle(" ");
+        collapsingToolbarLayout.setTitle(getString(R.string.map));
     }
 
     private void setupFAB() {
@@ -108,6 +121,7 @@ public class FragmentMap extends Fragment {
             @Override
             public void onMapReady(GoogleMap googleMap) {
                 googleMap.setMyLocationEnabled(true);
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation,15));
                 for (Item item : items) {
                     LatLng itemLocation = new LatLng(item.getLatitude(), item.getLongitude());
                     if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -135,5 +149,45 @@ public class FragmentMap extends Fragment {
     public void onPause() {
         Log.d(TAG, "onPause: ");
         super.onPause();
+    }
+
+    @Override
+    public String getTAG() {
+        return TAG;
+    }
+
+    @Override
+    public void onReturn(Fragment fragment, String fromTabType) {
+
+    }
+
+    @Override
+    public void toolbarExpanded()
+    {
+        fabMenu.showMenuButton(true);
+
+    }
+
+    @Override
+    public void toolbarCollapsed()
+    {
+        fabMenu.hideMenuButton(true);
+
+    }
+
+    @Override
+    public void onBackPressedCallback() {
+
+        getActivity().onBackPressed();
+    }
+
+    @Override
+    public void backPress() {
+
+    }
+
+    @Override
+    public String getTabType() {
+        return null;
     }
 }

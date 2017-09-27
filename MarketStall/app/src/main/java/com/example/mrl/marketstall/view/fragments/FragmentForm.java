@@ -41,6 +41,7 @@ import com.example.mrl.marketstall.utils.GPSTracker;
 import com.example.mrl.marketstall.utils.ImageUtils;
 import com.example.mrl.marketstall.utils.Utils;
 import com.example.mrl.marketstall.value.Values;
+import com.example.mrl.marketstall.view.MainActivity;
 import com.example.mrl.marketstall.viewholder.RecyclerViewHolderFormEditText;
 import com.example.mrl.marketstall.viewholder.RecyclerViewHolderFormRatingBar;
 import com.example.mrl.marketstall.viewholder.RecyclerViewHolderFormSpinner;
@@ -72,11 +73,8 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
     private DatabaseReference mDatabase;
     private DatabaseReference itemCloudEndPoint;
     private RecyclerGenericAdapter<ItemInfo> formInfoRecyclerAdapter;
-    private float latitude;
-    private float longitude;
     private GPSTracker gps;
     private Item item;
-    private String tabType;
     private Boolean editValue = false;
     private Uri imageURI;
     private boolean imageBoolean = false;
@@ -416,6 +414,7 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
                 }
                 SimpleDateFormat dateFormat = new SimpleDateFormat(getString(R.string.time_format));
                 item.setDateCreated(dateFormat.format(Calendar.getInstance().getTime()));
+                item.setUserId(((MainActivity)getActivity()).getUser().getUid());
                 if(gps.canGetLocation()){
 
                     item.setLatitude((float) gps.getLatitude());
@@ -457,7 +456,7 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
 
     @Override
     public String getTabType() {
-        return tabType;
+        return null;
     }
 
     @Override

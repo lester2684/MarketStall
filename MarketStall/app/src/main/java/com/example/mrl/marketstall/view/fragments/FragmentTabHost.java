@@ -17,7 +17,6 @@ import com.example.mrl.marketstall.interfaces.Callbacks;
 import com.example.mrl.marketstall.ui.ZoomOutPageTransformer;
 import com.example.mrl.marketstall.utils.Utils;
 import com.example.mrl.marketstall.value.Values;
-import com.example.mrl.marketstall.view.fragments.tab_fragments.FragmentTabRecycler;
 import com.github.clans.fab.FloatingActionMenu;
 
 import java.util.ArrayList;
@@ -122,7 +121,7 @@ public class FragmentTabHost extends Fragment implements Callbacks
         switch (tabType)
         {
             case Values.TAB_RECYCLERS:
-                fragmentList.add(new FragmentTabRecycler());
+                fragmentList.add(new FragmentRecycler());
                 fragmentList.add(new FragmentMap());
 
                 Bundle bundleItem = new Bundle();

@@ -1,4 +1,4 @@
-package com.example.mrl.marketstall.view.fragments.tab_fragments;
+package com.example.mrl.marketstall.view.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -25,8 +25,6 @@ import com.example.mrl.marketstall.ui.Animations;
 import com.example.mrl.marketstall.ui.DividerItemDecoration;
 import com.example.mrl.marketstall.utils.ImageUtils;
 import com.example.mrl.marketstall.value.Values;
-import com.example.mrl.marketstall.view.fragments.FragmentDetails;
-import com.example.mrl.marketstall.view.fragments.FragmentForm;
 import com.example.mrl.marketstall.viewholder.RecyclerViewHolder;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.github.clans.fab.FloatingActionButton;
@@ -42,7 +40,7 @@ import java.util.List;
 
 import static com.example.mrl.marketstall.R.id.fab_menu;
 
-public class FragmentTabRecycler extends Fragment implements Callbacks
+public class FragmentRecycler extends Fragment implements Callbacks
 {
     private final String TAG = getClass().getSimpleName();
     private View view;
@@ -57,7 +55,6 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
     private DatabaseReference itemCloudEndPoint;
     private List<Item> items;
     private String recyclerType;
-    private String tabType;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -85,7 +82,6 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
         recyclerView = view.findViewById(R.id.recyclerView);
 
         recyclerType = getArguments().getString(Values.RECYCLER_TYPE);
-        tabType = getArguments().getString(Values.TAB_TYPE);
 
         items = new ArrayList<>();
         mDatabase =  FirebaseDatabase.getInstance().getReference();
@@ -110,13 +106,13 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
 
     private void setupToolbar()
     {
-        AppBarLayout appBarLayout = (AppBarLayout) getActivity().findViewById(R.id.app_bar_layout);
+        AppBarLayout appBarLayout = getActivity().findViewById(R.id.app_bar_layout);
         appBarLayout.setExpanded(true);
 
-        CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout) getActivity().findViewById(R.id.collapsing_toolbar_layout);
+        CollapsingToolbarLayout collapsingToolbarLayout = getActivity().findViewById(R.id.collapsing_toolbar_layout);
         collapsingToolbarLayout.setTitle(getResources().getString(R.string.app_name));
 
-        Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+        Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
         toolbar.getMenu().clear();
     }
 
@@ -172,7 +168,7 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
 
     private void setupRecyclerView()
     {
-        TextView blankMessage = (TextView) view.findViewById(R.id.blank_message);
+        TextView blankMessage = view.findViewById(R.id.blank_message);
         switch (recyclerType)
         {
             case Values.ITEM:
@@ -369,7 +365,7 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
     @Override
     public void toolbarCollapsed()
     {
-        fabMenu.hideMenuButton(true);
+        fabMenu.hideMenuButton(false);
 
     }
 
@@ -394,6 +390,6 @@ public class FragmentTabRecycler extends Fragment implements Callbacks
     @Override
     public String getTabType()
     {
-        return tabType;
+        return null;
     }
 }
