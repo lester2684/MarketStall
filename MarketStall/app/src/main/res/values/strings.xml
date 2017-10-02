@@ -17,6 +17,8 @@
     <string name="map">Map</string>
     <string name="item_list">All Items</string>
     <string name="add_item_message" tools:ignore="TypographyEllipsis">Try adding a item...</string>
+    <string name="search_title">Search</string>
+    <string name="search_hint">Search for an item</string>
 
     <!--Text input error-->
     <string name="text_error_name_item">Enter the item name</string>

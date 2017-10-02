@@ -42,16 +42,6 @@ public class WorkaroundMapFragment extends SupportMapFragment implements Callbac
     }
 
     @Override
-    public void toolbarExpanded() {
-
-    }
-
-    @Override
-    public void toolbarCollapsed() {
-
-    }
-
-    @Override
     public void onBackPressedCallback() {
 
     }

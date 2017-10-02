@@ -9,6 +9,9 @@ public class Values
     public final static String SELECTED_ITEM = "selected_item";
     public final static String EDIT_VALUE = "edit_value";
     public final static String RECYCLER_TYPE = "recycler_type";
+    public final static String USER = "user";
+    public final static String USAGE_COUNT = "usage_count";
+    public final static String COUNT = "count";
     public final static String DETAILS_TYPE = "details_type";
     public final static String FORM_TYPE = "form_type";
     public final static String TAB_TYPE = "view_brew";

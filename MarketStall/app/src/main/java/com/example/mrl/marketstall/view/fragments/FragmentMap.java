@@ -162,20 +162,6 @@ public class FragmentMap extends Fragment implements Callbacks {
     }
 
     @Override
-    public void toolbarExpanded()
-    {
-        fabMenu.showMenuButton(true);
-
-    }
-
-    @Override
-    public void toolbarCollapsed()
-    {
-        fabMenu.hideMenuButton(true);
-
-    }
-
-    @Override
     public void onBackPressedCallback() {
 
         getActivity().onBackPressed();

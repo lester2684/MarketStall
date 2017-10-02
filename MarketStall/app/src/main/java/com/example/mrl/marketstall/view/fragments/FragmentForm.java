@@ -78,7 +78,6 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
     private Boolean editValue = false;
     private Uri imageURI;
     private boolean imageBoolean = false;
-    private boolean showMenu = false;
     private List<ItemInfo> formList;
     private String formType;
 
@@ -512,25 +511,5 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
     {
         Log.i(TAG, "onReturn: ");
 
-    }
-
-    @Override
-    public void toolbarExpanded()
-    {
-        fabMenu.showMenuButton(true);
-        if (showMenu)
-        {
-            showMenu = false;
-        }
-    }
-
-    @Override
-    public void toolbarCollapsed()
-    {
-        fabMenu.hideMenuButton(true);
-        if (!showMenu)
-        {
-            showMenu = true;
-        }
     }
 }

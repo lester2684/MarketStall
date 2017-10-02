@@ -59,10 +59,10 @@ public class FragmentDetails extends Fragment implements Callbacks {
     private DatabaseReference mDatabase;
     private DatabaseReference itemCloudEndPoint;
     private Item item;
-    private boolean showMenu = false;
     private List<ItemInfo> detailsList;
     private String detailsType;
     private WorkaroundMapFragment workaroundMapFragment;
+    private String userID;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -71,7 +71,6 @@ public class FragmentDetails extends Fragment implements Callbacks {
 
         setupValues();
         setupToolbar();
-        setupFAB();
         return view;
     }
 
@@ -84,6 +83,7 @@ public class FragmentDetails extends Fragment implements Callbacks {
         recyclerViewDetails = view.findViewById(R.id.recyclerViewDetails);
 
         detailsType = getArguments().getString(Values.DETAILS_TYPE);
+        userID = getArguments().getString(Values.USER);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
         itemCloudEndPoint = mDatabase.child("items");
@@ -101,6 +101,7 @@ public class FragmentDetails extends Fragment implements Callbacks {
                     collapsingToolbarLayout.setTitle(item.getName());
                     setupRecyclerViewDetails();
                     setupMap();
+                    setupFAB();
                 }
             }
 
@@ -118,28 +119,34 @@ public class FragmentDetails extends Fragment implements Callbacks {
     }
 
     private void setupFAB() {
-        fabMenu.setOnMenuButtonClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (fabMenu.isOpened()) {
-                    fabMenu.close(true);
-                } else {
-                    fabMenu.open(true);
-                }
-            }
-        });
-        if (fabMenu.isOpened()) {
-            fabMenu.close(true);
-            int delay = getResources().getInteger(R.integer.fab_delay);
-
-            new Handler().postDelayed(new Runnable() {
+        if (userID.equals(item.getId()) || item.getId() == null) {
+            fabMenu.setOnMenuButtonClickListener(new View.OnClickListener() {
                 @Override
-                public void run() {
-                    setFAB();
+                public void onClick(View v) {
+                    if (fabMenu.isOpened()) {
+                        fabMenu.close(true);
+                    } else {
+                        fabMenu.open(true);
+                    }
                 }
-            }, delay);
-        } else {
-            setFAB();
+            });
+            if (fabMenu.isOpened()) {
+                fabMenu.close(true);
+                int delay = getResources().getInteger(R.integer.fab_delay);
+
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        setFAB();
+                    }
+                }, delay);
+            } else {
+                setFAB();
+            }
+        }
+        else
+        {
+            fabMenu.hideMenuButton(false);
         }
     }
 
@@ -355,22 +362,6 @@ public class FragmentDetails extends Fragment implements Callbacks {
                     break;
             }
 
-        }
-    }
-
-    @Override
-    public void toolbarExpanded() {
-        fabMenu.showMenuButton(true);
-        if (showMenu) {
-            showMenu = false;
-        }
-    }
-
-    @Override
-    public void toolbarCollapsed() {
-        fabMenu.hideMenuButton(true);
-        if (!showMenu) {
-            showMenu = true;
         }
     }
 }

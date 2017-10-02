@@ -36,6 +36,12 @@ public class Item
         return details;
     }
 
+    @Override
+    public String toString() {
+
+        return getName();
+    }
+
     public void setByList(List<ItemInfo> list)
     {
         this.name = list.get(0).getText();
@@ -98,6 +104,12 @@ public class Item
         return Arrays.asList(Values.categories).indexOf(category);
     }
 
+    public void setIndexOfCategory()
+    {
+
+    }
+
+
     public float getQuality_rating() {
         return quality_rating;
     }
@@ -130,4 +142,5 @@ public class Item
     public void setLongitude(float longitude) {
         this.longitude = longitude;
     }
+
 }

@@ -97,7 +97,12 @@ public class ImageUtils
     {
         String fileName =   item.getImageName();
         FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference imageRef = storage.getReferenceFromUrl("gs://market-stall.appspot.com/images/"+fileName);
-        return imageRef;
+        if (fileName != null) {
+            return storage.getReferenceFromUrl("gs://market-stall.appspot.com/images/" + fileName);
+        }
+        else
+        {
+            return null;
+        }
     }
 }

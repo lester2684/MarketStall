@@ -33,7 +33,6 @@ public class FragmentTabHost extends Fragment implements Callbacks
     private ViewPager viewPager;
     private TabLayout tabLayout;
     private Bundle bundle;
-    private boolean showMenu = false;
     private String tabType;
 
     @Override
@@ -243,26 +242,6 @@ public class FragmentTabHost extends Fragment implements Callbacks
     public String getTabType()
     {
         return tabType;
-    }
-
-    @Override
-    public void toolbarExpanded()
-    {
-        fabMenu.showMenuButton(true);
-        if (showMenu)
-        {
-            showMenu = false;
-        }
-    }
-
-    @Override
-    public void toolbarCollapsed()
-    {
-        fabMenu.hideMenuButton(true);
-        if (!showMenu)
-        {
-            showMenu = true;
-        }
     }
 
     @Override
