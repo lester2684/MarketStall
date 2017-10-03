@@ -44,6 +44,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.miguelcatalan.materialsearchview.MaterialSearchView;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
@@ -298,7 +300,14 @@ public class FragmentRecycler extends Fragment implements Callbacks
         searchView.setVoiceSearch(true);
         searchView.setCursorDrawable(R.drawable.custom_cursor);
         ArrayList<String> array = new ArrayList<>();
-        //Needs to be ordered
+        Collections.sort(suggestions, new Comparator<Suggestion>() {
+
+            @Override
+            public int compare(Suggestion suggestion1, Suggestion suggestion2) {
+                return Integer.compare(suggestion2.getCount(), suggestion1.getCount());
+            }
+
+        });
         for (Suggestion suggestion : suggestions)
         {
             array.add(suggestion.getName());

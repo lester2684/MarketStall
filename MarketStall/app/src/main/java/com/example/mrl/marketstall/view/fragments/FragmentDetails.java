@@ -119,7 +119,7 @@ public class FragmentDetails extends Fragment implements Callbacks {
     }
 
     private void setupFAB() {
-        if (userID.equals(item.getId()) || item.getId() == null) {
+        if (userID.equals(item.getUserId())) {
             fabMenu.setOnMenuButtonClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -146,7 +146,8 @@ public class FragmentDetails extends Fragment implements Callbacks {
         }
         else
         {
-            fabMenu.hideMenuButton(false);
+            fabMenu.setVisibility(View.INVISIBLE);
+            fabMenu.hideMenuButton(true);
         }
     }
 
@@ -216,7 +217,7 @@ public class FragmentDetails extends Fragment implements Callbacks {
                 delete();
             }
         });
-
+        
         if (!fabMenu.isShown()) {
             showFabMenu();
         }
@@ -341,8 +342,10 @@ public class FragmentDetails extends Fragment implements Callbacks {
     public void onPause() {
         Log.i(TAG, "onPause: ");
         super.onPause();
-        if (fabMenu.isOpened()) {
-            fabMenu.close(true);
+        if (userID.equals(item.getUserId())) {
+            if (fabMenu.isOpened()) {
+                fabMenu.close(true);
+            }
         }
     }
 
