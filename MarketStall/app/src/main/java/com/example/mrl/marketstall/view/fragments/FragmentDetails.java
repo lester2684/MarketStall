@@ -26,7 +26,6 @@ import com.example.mrl.marketstall.custom.WorkaroundMapFragment;
 import com.example.mrl.marketstall.interfaces.Callbacks;
 import com.example.mrl.marketstall.model.Item;
 import com.example.mrl.marketstall.model.ItemInfo;
-import com.example.mrl.marketstall.ui.Animations;
 import com.example.mrl.marketstall.utils.ImageUtils;
 import com.example.mrl.marketstall.value.Values;
 import com.example.mrl.marketstall.viewholder.RecyclerViewHolderDetailTextView;
@@ -351,20 +350,12 @@ public class FragmentDetails extends Fragment implements Callbacks {
 
     @Override
     public void onBackPressedCallback() {
-        Log.i(TAG, "backButtonWasPressed: ");
+        Log.i(TAG, "onBackPressedCallback: ");
 
     }
 
     @Override
     public void onReturn(Fragment fromFragment, String fromTabType) {
         Log.i(TAG, "onReturn: ");
-        if (fromFragment instanceof FragmentTabHost) {
-            switch (detailsType) {
-                case Values.ITEM:
-                    Animations.toolbarAnimation(getActivity(), R.anim.slide_right_out, R.anim.slide_left_in, ImageUtils.getImage(item), R.raw.photo_coffee_beans);
-                    break;
-            }
-
-        }
     }
 }

@@ -15,7 +15,7 @@ public class RecyclerViewHolderDetailTextView extends RecyclerView.ViewHolder
     public RecyclerViewHolderDetailTextView(final View itemView)
     {
         super(itemView);
-        icon = (ImageView) itemView.findViewById(R.id.icon);
-        text = (TextView) itemView.findViewById(R.id.text);
+        icon = itemView.findViewById(R.id.icon);
+        text = itemView.findViewById(R.id.text);
     }
 }

@@ -64,6 +64,9 @@ public class MainActivity extends RuntimePermissionsActivity implements Navigati
     private FirebaseUser user;
     private TextView mStatusTextView;
     private TextView mDetailTextView;
+    private ImageView icon;
+    private LinearLayout googleAuthLayout;
+    private LayoutInflater inflater;
     public ProgressDialog mProgressDialog;
     private FrameLayout frameLayout;
     private DrawerLayout drawLayout;
@@ -79,6 +82,7 @@ public class MainActivity extends RuntimePermissionsActivity implements Navigati
         setupToolbar();
         setupView();
         setupAuth();
+        signIn();
         updateUI(user);
     }
     private void checkPermissions()
@@ -143,15 +147,15 @@ public class MainActivity extends RuntimePermissionsActivity implements Navigati
 
     private void setupView()
     {
-        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        LinearLayout googleAuthLayout = (LinearLayout) inflater.inflate(R.layout.fragment_google_auth, null);
+        inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        googleAuthLayout = (LinearLayout) inflater.inflate(R.layout.fragment_google_auth, null);
         frameLayout = findViewById(R.id.fragment_container_main);
         frameLayout.addView(googleAuthLayout);
 
         drawLayout = findViewById(R.id.drawer_layout);
         mStatusTextView = findViewById(R.id.status);
         mDetailTextView = findViewById(R.id.detail);
-        ImageView icon = findViewById(R.id.google_icon);
+        icon = findViewById(R.id.google_icon);
         Glide
                 .with(this)
                 .load(R.raw.firebase_lockup_400)
@@ -182,6 +186,7 @@ public class MainActivity extends RuntimePermissionsActivity implements Navigati
 
     private void toRecycler()
     {
+        getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         fabMenu.showMenuButton(true);
         frameLayout.removeAllViews();
         Bundle bundle = new Bundle();
@@ -193,11 +198,13 @@ public class MainActivity extends RuntimePermissionsActivity implements Navigati
                 .beginTransaction()
                 .setCustomAnimations(R.anim.slide_up_in, R.anim.slide_down_out, R.anim.slide_up_in, R.anim.slide_down_out)
                 .replace(R.id.fragment_container_main, fragment, fragment.getTAG())
+                .addToBackStack(fragment.getTAG())
                 .commit();
     }
 
     private void toMap()
     {
+        getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         fabMenu.hideMenuButton(true);
         frameLayout.removeAllViews();
         FragmentMap fragment = new FragmentMap();
@@ -205,11 +212,14 @@ public class MainActivity extends RuntimePermissionsActivity implements Navigati
                 .beginTransaction()
                 .setCustomAnimations(R.anim.slide_up_in, R.anim.slide_down_out, R.anim.slide_up_in, R.anim.slide_down_out)
                 .replace(R.id.fragment_container_main, fragment, fragment.getTAG())
+                .addToBackStack(fragment.getTAG())
                 .commit();
     }
 
     private void toGoogleAuth()
     {
+        fabMenu.setVisibility(View.INVISIBLE);
+        getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         setupView();
         setupAuth();
         FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -306,7 +316,6 @@ public class MainActivity extends RuntimePermissionsActivity implements Navigati
         }
         else
             {
-                toGoogleAuth();
                 drawLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                 toolbar.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override
@@ -325,9 +334,6 @@ public class MainActivity extends RuntimePermissionsActivity implements Navigati
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct)
     {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
-        // [START_EXCLUDE silent]
-        showProgressDialog();
-        // [END_EXCLUDE]
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)
@@ -344,23 +350,8 @@ public class MainActivity extends RuntimePermissionsActivity implements Navigati
                             Toast.makeText(MainActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
                             updateUI(null);
                         }
-
-                        // [START_EXCLUDE]
-                        hideProgressDialog();
-                        // [END_EXCLUDE]
                     }
                 });
-    }
-
-    public void showProgressDialog()
-    {
-        if (mProgressDialog == null) {
-            mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setMessage(getString(R.string.loading));
-            mProgressDialog.setIndeterminate(true);
-        }
-
-        mProgressDialog.show();
     }
 
     public void hideProgressDialog()
@@ -389,6 +380,8 @@ public class MainActivity extends RuntimePermissionsActivity implements Navigati
     protected void onResume()
     {
         super.onResume();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        updateUser(currentUser);
     }
 
     @Override

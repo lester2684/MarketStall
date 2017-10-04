@@ -35,8 +35,8 @@ import com.example.mrl.marketstall.adapter.RecyclerGenericAdapter;
 import com.example.mrl.marketstall.adapter.SpinnerGenericAdapter;
 import com.example.mrl.marketstall.interfaces.Callbacks;
 import com.example.mrl.marketstall.interfaces.CallbacksTabEdit;
-import com.example.mrl.marketstall.model.ItemInfo;
 import com.example.mrl.marketstall.model.Item;
+import com.example.mrl.marketstall.model.ItemInfo;
 import com.example.mrl.marketstall.utils.GPSTracker;
 import com.example.mrl.marketstall.utils.ImageUtils;
 import com.example.mrl.marketstall.utils.Utils;
@@ -243,7 +243,7 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
                                 layoutParams.setMarginEnd(getResources().getDimensionPixelSize(R.dimen.form_icon_margin_32));
                                 viewHolderFormSpinner.spinner.setLayoutParams(layoutParams);
                                 if (item != null)
-                                    viewHolderFormSpinner.spinner.setSelection(item.getIndexOfCategory());
+                                    viewHolderFormSpinner.spinner.setSelection(Arrays.asList(Values.categories).indexOf(item.getCategory()));
                                 viewHolderFormSpinner.spinner.setOnTouchListener(new View.OnTouchListener() {
                                     @Override
                                     public boolean onTouch(View v, MotionEvent event) {
@@ -399,27 +399,27 @@ public class FragmentForm extends Fragment implements Callbacks, CallbacksTabEdi
     public void save()
     {
         Log.i(TAG, "save: ");
-        switch (formType)
-        {
+        switch (formType) {
             case Values.ITEM:
-                if (!validateName())
-                {
+                if (!validateName()) {
                     return;
                 }
                 item.setByList(formList);
-                if (imageBoolean)
-                {
+                if (imageBoolean) {
                     ImageUtils.saveImage(getActivity(), imageURI, item);
                 }
-                SimpleDateFormat dateFormat = new SimpleDateFormat(getString(R.string.time_format));
-                item.setDateCreated(dateFormat.format(Calendar.getInstance().getTime()));
-                item.setUserId(((MainActivity)getActivity()).getUser().getUid());
-                if(gps.canGetLocation()){
+                item.setUserId(((MainActivity) getActivity()).getUser().getUid());
+                if (!editValue)
+                {
+                    SimpleDateFormat dateFormat = new SimpleDateFormat(getString(R.string.time_format));
+                    item.setDateCreated(dateFormat.format(Calendar.getInstance().getTime()));
+                    if (gps.canGetLocation()) {
 
-                    item.setLatitude((float) gps.getLatitude());
-                    item.setLongitude((float) gps.getLongitude());
-                }else{
-                    gps.showSettingsAlert();
+                        item.setLatitude((float) gps.getLatitude());
+                        item.setLongitude((float) gps.getLongitude());
+                    } else {
+                        gps.showSettingsAlert();
+                    }
                 }
                 itemCloudEndPoint.child(item.getId()).setValue(item);
                 backPress();

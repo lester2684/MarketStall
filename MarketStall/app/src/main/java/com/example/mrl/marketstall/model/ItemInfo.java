@@ -49,7 +49,7 @@ public class ItemInfo
 
     public boolean getShowDetail()
     {
-        return showForm;
+        return showDetail;
     }
 
     public void setText(String text)

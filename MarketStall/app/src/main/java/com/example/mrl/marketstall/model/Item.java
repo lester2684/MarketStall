@@ -4,7 +4,6 @@ import com.example.mrl.marketstall.R;
 import com.example.mrl.marketstall.value.Values;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Item
@@ -31,8 +30,8 @@ public class Item
         details.add(1, new ItemInfo(dateCreated, R.drawable.ic_date, R.string.text_date, false, true, Values.TEXT_FIElD, Values.TEXT_VIEW));
         details.add(2, new ItemInfo(String.valueOf(price), R.raw.icon_price, R.string.text_price, true, true, Values.TEXT_FIElD, Values.TEXT_VIEW));
         details.add(3, new ItemInfo(String.valueOf(latitude) + "," + String.valueOf(longitude), R.drawable.ic_location, R.string.text_location, false, false, Values.TEXT_FIElD, Values.MAP_VIEW));
-        details.add(4, new ItemInfo(String.valueOf(category), R.drawable.ic_location, R.string.text_category, true, true, Values.SPINNER, Values.TEXT_VIEW));
-        details.add(5, new ItemInfo(String.valueOf(quality_rating), R.drawable.ic_location, R.string.text_quality_rating, true, true, Values.RATING_BAR, Values.TEXT_VIEW));
+        details.add(4, new ItemInfo(String.valueOf(category), R.drawable.ic_category, R.string.text_category, true, true, Values.SPINNER, Values.TEXT_VIEW));
+        details.add(5, new ItemInfo(String.valueOf(quality_rating), R.drawable.ic_quality, R.string.text_quality_rating, true, true, Values.RATING_BAR, Values.TEXT_VIEW));
         return details;
     }
 
@@ -99,16 +98,6 @@ public class Item
     public String getCategory() {
         return category;
     }
-
-    public int getIndexOfCategory() {
-        return Arrays.asList(Values.categories).indexOf(category);
-    }
-
-    public void setIndexOfCategory()
-    {
-
-    }
-
 
     public float getQuality_rating() {
         return quality_rating;

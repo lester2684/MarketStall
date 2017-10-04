@@ -386,7 +386,6 @@ public class FragmentRecycler extends Fragment implements Callbacks
         Log.i(TAG, "toSelectedItem: ");
         Bundle bundle = new Bundle();
         Item item = (Item) items.get(position);
-        Log.d(TAG, "toSelectedItem: " + ImageUtils.getImage(item));
         Animations.toolbarAnimation(getActivity(), R.anim.slide_left_out, R.anim.slide_right_in, ImageUtils.getImage(item), R.raw.photo_pour_over);
         bundle.putString(Values.SELECTED_ITEM, item.getId());
         bundle.putBoolean(Values.EDIT_VALUE, false);
@@ -401,6 +400,7 @@ public class FragmentRecycler extends Fragment implements Callbacks
                 .replace(R.id.fragment_container_main, fragment, fragment.getTAG())
                 .addToBackStack(fragment.getTag())
                 .commit();
+        Log.d(TAG, "toSelectedItem: " + getActivity().getSupportFragmentManager().getFragments());
     }
 
     private void addItem()
@@ -498,7 +498,7 @@ public class FragmentRecycler extends Fragment implements Callbacks
     {
         Log.i(TAG, "onResume: ");
         super.onResume();
-        Animations.toolbarAnimation(getActivity(), R.anim.slide_right_out, R.anim.slide_left_in, null, R.raw.photo_coffee_cherries);
+        updateList(recyclerItems);
     }
 
     @Override
