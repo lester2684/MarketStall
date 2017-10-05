@@ -10,6 +10,7 @@ public class Values
     public final static String EDIT_VALUE = "edit_value";
     public final static String RECYCLER_TYPE = "recycler_type";
     public final static String USER = "user";
+    public final static String ITEM_NAME = "item_name";
     public final static String USAGE_COUNT = "usage_count";
     public final static String COUNT = "count";
     public final static String DETAILS_TYPE = "details_type";

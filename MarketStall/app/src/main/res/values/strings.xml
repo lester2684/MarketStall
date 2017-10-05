@@ -22,12 +22,14 @@
 
     <!--Text input error-->
     <string name="text_error_name_item">Enter the item name</string>
-    <string name="time_format">dd/MM/yyyy hh:mm:ss aa</string>
+    <string name="time_format">MM/dd/yyyy hh:mm:ss aa</string>
+    <string name="time_format2">dd/MM/yyyy hh:mm:ss aa</string>
 
     <!--Text view-->
     <string name="brews">Brews</string>
     <string name="text_name">Name</string>
     <string name="text_date">Date</string>
+    <string name="average_price">Average Price</string>
     <string name="text_price">Price</string>
     <string name="text_location">Location</string>
     <string name="text_category">Category</string>
@@ -37,6 +39,7 @@
 
     <!--Button texts-->
     <string name="button_delete">Delete</string>
+    <string name="button_forecast">Price Forecast</string>
     <string name="button_edit">Edit</string>
     <string name="button_item">Item</string>
     <string name="button_add_info">Add More Information</string>

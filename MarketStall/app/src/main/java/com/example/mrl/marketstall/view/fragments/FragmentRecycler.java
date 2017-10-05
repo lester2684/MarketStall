@@ -102,9 +102,9 @@ public class FragmentRecycler extends Fragment implements Callbacks
         recyclerItems = new ArrayList<>();
         suggestions = new ArrayList<>();
         mDatabase =  FirebaseDatabase.getInstance().getReference();
+
         itemCloudEndPoint = mDatabase.child("items");
         userCloudEndPoint = mDatabase.child("users").child(userID);
-
         itemCloudEndPoint.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -121,7 +121,6 @@ public class FragmentRecycler extends Fragment implements Callbacks
                 Log.d(TAG, databaseError.getMessage());
             }
         });
-
         userCloudEndPoint.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -138,6 +137,8 @@ public class FragmentRecycler extends Fragment implements Callbacks
                 Log.d(TAG, databaseError.getMessage());
             }
         });
+
+
     }
 
     private void setupToolbar()
@@ -498,7 +499,6 @@ public class FragmentRecycler extends Fragment implements Callbacks
     {
         Log.i(TAG, "onResume: ");
         super.onResume();
-        updateList(recyclerItems);
     }
 
     @Override

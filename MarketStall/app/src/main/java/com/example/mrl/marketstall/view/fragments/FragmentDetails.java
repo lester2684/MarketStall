@@ -53,6 +53,7 @@ public class FragmentDetails extends Fragment implements Callbacks {
     private FloatingActionMenu fabMenu;
     private FloatingActionButton fabEdit;
     private FloatingActionButton fabDelete;
+    private FloatingActionButton fabForecast;
     private RecyclerView recyclerViewDetails;
     private RecyclerGenericAdapter<ItemInfo> detailsInfoRecyclerAdapter;
     private DatabaseReference mDatabase;
@@ -79,6 +80,7 @@ public class FragmentDetails extends Fragment implements Callbacks {
         fabMenu = getActivity().findViewById(R.id.fab_menu);
         fabEdit = getActivity().findViewById(R.id.fab2);
         fabDelete = getActivity().findViewById(R.id.fab3);
+        fabForecast = getActivity().findViewById(R.id.fab1);
         recyclerViewDetails = view.findViewById(R.id.recyclerViewDetails);
 
         detailsType = getArguments().getString(Values.DETAILS_TYPE);
@@ -216,6 +218,16 @@ public class FragmentDetails extends Fragment implements Callbacks {
                 delete();
             }
         });
+
+        fabForecast.setVisibility(View.INVISIBLE);
+        fabForecast.setImageDrawable(getResources().getDrawable(R.drawable.ic_forecast, getActivity().getTheme()));
+        fabForecast.setLabelText(getString(R.string.button_forecast));
+        fabForecast.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                forecast();
+            }
+        });
         
         if (!fabMenu.isShown()) {
             showFabMenu();
@@ -307,6 +319,21 @@ public class FragmentDetails extends Fragment implements Callbacks {
         }
 
 
+    }
+
+    private void forecast() {
+        Log.i(TAG, "forecast: ");
+        Bundle bundle = new Bundle();
+        bundle.putString(Values.ITEM_NAME, item.getName());
+        FragmentForecast fragment = new FragmentForecast();
+        fragment.setArguments(bundle);
+        getActivity()
+                .getSupportFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(R.anim.slide_up_in, R.anim.slide_down_out, R.anim.slide_up_in, R.anim.slide_down_out)
+                .replace(R.id.fragment_container_main, fragment, fragment.getTAG())
+                .addToBackStack(fragment.getTag())
+                .commit();
     }
 
     public String getDetailsType() {
