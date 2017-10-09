@@ -28,10 +28,12 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration
 
     public DividerItemDecoration(Context context, int orientation)
     {
-        final TypedArray a = context.obtainStyledAttributes(ATTRS);
-        mDivider = a.getDrawable(0);
-        a.recycle();
-        setOrientation(orientation);
+        if (context != null) {
+            final TypedArray a = context.obtainStyledAttributes(ATTRS);
+            mDivider = a.getDrawable(0);
+            a.recycle();
+            setOrientation(orientation);
+        }
     }
 
     private void setOrientation(int orientation)

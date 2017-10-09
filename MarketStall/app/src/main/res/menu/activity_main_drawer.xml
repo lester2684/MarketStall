@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:title="@string/tools">
+    <item android:title="">
 
         <menu>
-
             <item
-                android:id="@+id/nav_extraction_yield_cal"
-                android:icon="@drawable/button"
-                android:title="@string/extraction_yield_calculate" />
-
+                android:id="@+id/nav_list"
+                android:icon="@drawable/ic_list"
+                android:title="@string/item_list" />
+            <item
+                android:id="@+id/nav_map"
+                android:icon="@drawable/ic_map"
+                android:title="@string/map" />
         </menu>
 
     </item>
@@ -17,11 +19,10 @@
     <item android:title="@string/settings">
 
         <menu>
-
             <item
-                android:id="@+id/nav_reset_tutorial"
-                android:icon="@android:drawable/ic_menu_revert"
-                android:title="@string/reset_tutorial" />
+                android:id="@+id/nav_user_auth"
+                android:icon="@drawable/ic_user"
+                android:title="@string/user_authentication" />
         </menu>
 
     </item>

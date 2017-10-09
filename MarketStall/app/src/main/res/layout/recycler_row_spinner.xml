@@ -20,24 +20,4 @@
         android:layout_centerVertical="true"
         style="@style/Base.Widget.AppCompat.Spinner.Underlined"/>
 
-    <TextView
-        android:id="@+id/text_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/icon"
-        android:layout_margin="@dimen/form_icon_margin_16"
-        android:layout_centerVertical="true"
-        android:visibility="invisible"
-        android:text="@string/add_coffee"
-        android:textSize="@dimen/text_size_17"/>
-
-    <ImageView
-        android:id="@+id/button"
-        android:layout_height="@dimen/circular_image_view_size_30"
-        android:layout_width="@dimen/circular_image_view_size_30"
-        android:layout_centerVertical="true"
-        android:layout_alignParentEnd="true"
-        android:visibility="gone"
-        android:src="@drawable/button"/>
-
 </RelativeLayout>

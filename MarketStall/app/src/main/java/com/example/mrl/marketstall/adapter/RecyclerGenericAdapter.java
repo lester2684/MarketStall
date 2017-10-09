@@ -5,7 +5,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class RecyclerGenericAdapter<T> extends RecyclerView.Adapter<RecyclerView.ViewHolder>
@@ -16,7 +15,7 @@ public abstract class RecyclerGenericAdapter<T> extends RecyclerView.Adapter<Rec
     private List<T> items;
     private OnRecyclerItemClicked onRecyclerItemClicked;
 
-    public abstract RecyclerView.ViewHolder setViewHolder(ViewGroup parent, int viewType, OnRecyclerItemClicked onRecyclerItemClicked);
+    public abstract RecyclerView.ViewHolder setViewHolder(ViewGroup parent, int viewType, OnRecyclerItemClicked onRecyclerItemClicked, List<T> items);
 
     public abstract void onBindData(Context context, RecyclerView.ViewHolder holder, T val, int position);
 
@@ -32,13 +31,13 @@ public abstract class RecyclerGenericAdapter<T> extends RecyclerView.Adapter<Rec
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
-        return setViewHolder(parent , viewType, onRecyclerItemClicked);
+        return setViewHolder(parent , viewType, onRecyclerItemClicked, items);
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position)
     {
-        onBindData(context, holder,items.get(position), position);
+        onBindData(context, holder, items.get(position), position);
     }
 
     @Override
@@ -54,16 +53,19 @@ public abstract class RecyclerGenericAdapter<T> extends RecyclerView.Adapter<Rec
         notifyDataSetChanged();
     }
 
-    public void addAll(List<T> list)
-    {
-        this.items.addAll(list);
-        notifyDataSetChanged();
+    public void addAll(List<T> list) {
+        if (!this.items.containsAll(list)) {
+            this.items.addAll(list);
+            notifyDataSetChanged();
+        }
     }
 
-    public void setItems( ArrayList<T> savedCardItems)
+    public void setItems(List<T> list)
     {
-        items = savedCardItems;
-        this.notifyDataSetChanged();
+        if (!this.items.containsAll(list)) {
+            items = list;
+            this.notifyDataSetChanged();
+        }
     }
 
     public T getItem(int position)

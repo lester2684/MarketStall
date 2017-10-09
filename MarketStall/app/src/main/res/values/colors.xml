@@ -18,4 +18,5 @@
     <color name="black">#000000</color>
     <color name="shadow">#000000</color>
     <color name="transparentDark">#b4000000</color>
+    <color name="transparent">#fa0000</color>
 </resources>
