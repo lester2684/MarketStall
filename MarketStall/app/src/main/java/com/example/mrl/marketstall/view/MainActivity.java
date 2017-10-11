@@ -7,6 +7,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -171,6 +172,8 @@ public class MainActivity extends RuntimePermissionsActivity implements Navigati
 
     private void setupAuth()
     {
+        CollapsingToolbarLayout collapsingToolbarLayout = findViewById(R.id.collapsing_toolbar_layout);
+        collapsingToolbarLayout.setTitle(getResources().getString(R.string.app_name));
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
@@ -205,7 +208,7 @@ public class MainActivity extends RuntimePermissionsActivity implements Navigati
     private void toMap()
     {
         getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        fabMenu.hideMenuButton(true);
+        fabMenu.setVisibility(View.INVISIBLE);
         frameLayout.removeAllViews();
         FragmentMap fragment = new FragmentMap();
         getSupportFragmentManager()

@@ -65,11 +65,13 @@ public class FragmentRecycler extends Fragment implements Callbacks
     private DatabaseReference mDatabase;
     private DatabaseReference itemCloudEndPoint;
     private DatabaseReference userCloudEndPoint;
-    private List items;
-    private List recyclerItems;
+    private List<Item> items;
+    private List<Item> recyclerItems;
     private List<Suggestion> suggestions;
+    private List<Suggestion> suggestionsSearch;
     private MaterialSearchView searchView;
     private String userID;
+    private boolean searching = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -101,6 +103,7 @@ public class FragmentRecycler extends Fragment implements Callbacks
         items = new ArrayList<>();
         recyclerItems = new ArrayList<>();
         suggestions = new ArrayList<>();
+        suggestionsSearch = new ArrayList<>();
         mDatabase =  FirebaseDatabase.getInstance().getReference();
 
         itemCloudEndPoint = mDatabase.child("items");
@@ -137,8 +140,6 @@ public class FragmentRecycler extends Fragment implements Callbacks
                 Log.d(TAG, databaseError.getMessage());
             }
         });
-
-
     }
 
     private void setupToolbar()
@@ -192,6 +193,7 @@ public class FragmentRecycler extends Fragment implements Callbacks
             @Override
             public void onRefresh()
             {
+                searching = false;
                 updateList(items);
             }
         });
@@ -265,6 +267,7 @@ public class FragmentRecycler extends Fragment implements Callbacks
             @Override
             public boolean onQueryTextSubmit(String query) {
                 searchList(query);
+                searching = true;
                 for (int i = 0; i < suggestions.size(); i++)
                 {
                     Suggestion suggestion = suggestions.get(i);
@@ -282,7 +285,9 @@ public class FragmentRecycler extends Fragment implements Callbacks
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                searchList(newText);
+                if (!searching) {
+                    searchList(newText);
+                }
                 return false;
             }
         });
@@ -290,32 +295,14 @@ public class FragmentRecycler extends Fragment implements Callbacks
         searchView.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
             @Override
             public void onSearchViewShown() {
-                updateList(recyclerItems);
+                searching = false;
             }
 
             @Override
             public void onSearchViewClosed() {
-                updateList(recyclerItems);
             }
         });
-        searchView.setVoiceSearch(true);
         searchView.setCursorDrawable(R.drawable.custom_cursor);
-        ArrayList<String> array = new ArrayList<>();
-        Collections.sort(suggestions, new Comparator<Suggestion>() {
-
-            @Override
-            public int compare(Suggestion suggestion1, Suggestion suggestion2) {
-                return Integer.compare(suggestion2.getCount(), suggestion1.getCount());
-            }
-
-        });
-        for (Suggestion suggestion : suggestions)
-        {
-            array.add(suggestion.getName());
-        }
-        String[] mStringArray = new String[array.size()];
-        mStringArray = array.toArray(mStringArray);
-        searchView.setSuggestions(mStringArray);
     }
 
     private void setFAB()
@@ -358,21 +345,56 @@ public class FragmentRecycler extends Fragment implements Callbacks
         }
     }
 
-    private void updateList(List list)
+    private void updateList(List<Item> list)
     {
-        recyclerItems = list;
-        if (itemRecyclerGenericAdapter != null) {
-            itemRecyclerGenericAdapter.clear();
-            itemRecyclerGenericAdapter.addAll(recyclerItems);
-            itemRecyclerGenericAdapter.notifyDataSetChanged();
-            swipeRefreshLayout.setRefreshing(false);
+        Log.d(TAG, "updateList: ");
+        suggestionsSearch.clear();
+        suggestionsSearch.addAll(suggestions);
+        Collections.sort(suggestionsSearch, new Comparator<Suggestion>() {
+            @Override
+            public int compare(Suggestion suggestion1, Suggestion suggestion2) {
+                return Integer.compare(suggestion2.getCount(), suggestion1.getCount());
+            }
+
+        });
+        List<Item> sortedItems = new ArrayList<>();
+        ArrayList<String> suggestionsArray = new ArrayList<>();
+        for (Suggestion s : suggestionsSearch)
+        {
+            suggestionsArray.add(s.getName());
+            for (Item item : list)
+            {
+                if (item.getName().equalsIgnoreCase(s.getName()))
+                {
+                    sortedItems.add(item);
+                }
+            }
+        }
+        for (Item item : list)
+        {
+            if (!sortedItems.contains(item))
+            {
+                sortedItems.add(item);
+            }
+        }
+        String[] mStringArray = new String[suggestionsArray.size()];
+        mStringArray = suggestionsArray.toArray(mStringArray);
+        searchView.setSuggestions(mStringArray);
+        if (!searching) {
+            recyclerItems = sortedItems;
+            if (itemRecyclerGenericAdapter != null) {
+                itemRecyclerGenericAdapter.clear();
+                itemRecyclerGenericAdapter.addAll(recyclerItems);
+                itemRecyclerGenericAdapter.notifyDataSetChanged();
+                swipeRefreshLayout.setRefreshing(false);
+            }
         }
     }
 
     private void searchList(String query)
     {
-        List<Object> results = new ArrayList<>();
-        for (Object item : items)
+        List<Item> results = new ArrayList<>();
+        for (Item item : items)
         {
             if (item.toString().toLowerCase().contains(query.toLowerCase()))
             {
@@ -386,7 +408,7 @@ public class FragmentRecycler extends Fragment implements Callbacks
     {
         Log.i(TAG, "toSelectedItem: ");
         Bundle bundle = new Bundle();
-        Item item = (Item) items.get(position);
+        Item item = recyclerItems.get(position);
         Animations.toolbarAnimation(getActivity(), R.anim.slide_left_out, R.anim.slide_right_in, ImageUtils.getImage(item), R.raw.photo_pour_over);
         bundle.putString(Values.SELECTED_ITEM, item.getId());
         bundle.putBoolean(Values.EDIT_VALUE, false);
@@ -401,7 +423,6 @@ public class FragmentRecycler extends Fragment implements Callbacks
                 .replace(R.id.fragment_container_main, fragment, fragment.getTAG())
                 .addToBackStack(fragment.getTag())
                 .commit();
-        Log.d(TAG, "toSelectedItem: " + getActivity().getSupportFragmentManager().getFragments());
     }
 
     private void addItem()
@@ -498,6 +519,7 @@ public class FragmentRecycler extends Fragment implements Callbacks
     public void onResume()
     {
         Log.i(TAG, "onResume: ");
+        updateList(items);
         super.onResume();
     }
 
