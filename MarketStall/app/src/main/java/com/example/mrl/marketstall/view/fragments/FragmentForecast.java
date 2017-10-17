@@ -69,7 +69,7 @@ public class FragmentForecast extends Fragment implements Callbacks
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
         recyclerView = view.findViewById(R.id.recyclerView);
 
-        itemName = getArguments().getString(Values.ITEM_NAME);
+        itemName = getArguments().getString(Values.SELECTED_ITEM_NAME);
 
         weekForecast = new ArrayList<>();
         recyclerForecast = new ArrayList<>();
@@ -84,7 +84,6 @@ public class FragmentForecast extends Fragment implements Callbacks
                     Forecast forecast = arraySnapshot.getValue(Forecast.class);
                     weekForecast.add(forecast);
                 }
-                Log.d(TAG, "onDataChange: " + weekForecast);
                 setupRecyclerView();
             }
 
@@ -152,7 +151,7 @@ public class FragmentForecast extends Fragment implements Callbacks
             {
                 RecyclerViewHolder recyclerViewHolder = (RecyclerViewHolder) holder;
                 recyclerViewHolder.title1.setText(forecast.getDay());
-                recyclerViewHolder.title2.setText(getString(R.string.average_price) + ": $" + forecast.getAverage());
+                recyclerViewHolder.title2.setText(getString(R.string.average_price) + ": $" + String.format("%.2f", forecast.getAverage()));
             }
 
             @Override

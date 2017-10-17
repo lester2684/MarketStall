@@ -57,7 +57,7 @@ public class FragmentRecycler extends Fragment implements Callbacks
     private View view;
     private FloatingActionMenu fabMenu;
     private FloatingActionButton fabAddItem;
-    private FloatingActionButton fab2;
+    private FloatingActionButton fabForecast;
     private FloatingActionButton fab1;
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
@@ -65,13 +65,16 @@ public class FragmentRecycler extends Fragment implements Callbacks
     private DatabaseReference mDatabase;
     private DatabaseReference itemCloudEndPoint;
     private DatabaseReference userCloudEndPoint;
-    private List<Item> items;
     private List<Item> recyclerItems;
+    private List<Item> items;
+    private List<String> groupedItemsNames;
     private List<Suggestion> suggestions;
     private List<Suggestion> suggestionsSearch;
     private MaterialSearchView searchView;
     private String userID;
     private boolean searching = false;
+    private String recyclerType;
+    private String itemName;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -91,21 +94,26 @@ public class FragmentRecycler extends Fragment implements Callbacks
     {
         fabMenu = getActivity().findViewById(fab_menu);
         fabAddItem = getActivity().findViewById(R.id.fab3);
-        fab2 = getActivity().findViewById(R.id.fab2);
+        fabForecast = getActivity().findViewById(R.id.fab2);
         fab1 = getActivity().findViewById(R.id.fab1);
 
         searchView = getActivity().findViewById(R.id.search_view);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
         recyclerView = view.findViewById(R.id.recyclerView);
 
+        itemName = getArguments().getString(Values.SELECTED_ITEM_NAME);
+        if (itemName != null) {
+            itemName = itemName.toLowerCase();
+        }
         userID = getArguments().getString(Values.USER);
+        recyclerType = getArguments().getString(Values.RECYCLER_TYPE);
 
         items = new ArrayList<>();
         recyclerItems = new ArrayList<>();
         suggestions = new ArrayList<>();
+        groupedItemsNames = new ArrayList<>();
         suggestionsSearch = new ArrayList<>();
         mDatabase =  FirebaseDatabase.getInstance().getReference();
-
         itemCloudEndPoint = mDatabase.child("items");
         userCloudEndPoint = mDatabase.child("users").child(userID);
         itemCloudEndPoint.addValueEventListener(new ValueEventListener() {
@@ -114,7 +122,20 @@ public class FragmentRecycler extends Fragment implements Callbacks
                 items.clear();
                 for (DataSnapshot itemSnapshot: dataSnapshot.getChildren()){
                     Item item = itemSnapshot.getValue(Item.class);
-                    items.add(item);
+                    switch (recyclerType)
+                    {
+                        case Values.GROUPED_ITEMS:
+                            if (!groupedItemsNames.contains(item.getName().toLowerCase())) {
+                                groupedItemsNames.add(item.getName().toLowerCase());
+                                items.add(item);
+                            }
+                            break;
+                        case Values.ITEMS:
+                            if (item.getName().equalsIgnoreCase(itemName)) {
+                                items.add(item);
+                            }
+                            break;
+                    }
                 }
                 setupRecyclerView();
             }
@@ -148,7 +169,15 @@ public class FragmentRecycler extends Fragment implements Callbacks
         appBarLayout.setExpanded(true);
 
         CollapsingToolbarLayout collapsingToolbarLayout = getActivity().findViewById(R.id.collapsing_toolbar_layout);
-        collapsingToolbarLayout.setTitle(getResources().getString(R.string.app_name));
+        switch(recyclerType)
+        {
+            case Values.GROUPED_ITEMS:
+                collapsingToolbarLayout.setTitle(getResources().getString(R.string.app_name));
+                break;
+            case Values.ITEMS:
+                collapsingToolbarLayout.setTitle(itemName.substring(0,1).toUpperCase() + itemName.substring(1));
+                break;
+        }
         setHasOptionsMenu(true);
     }
 
@@ -215,7 +244,7 @@ public class FragmentRecycler extends Fragment implements Callbacks
         {
             blankMessage.setVisibility(View.GONE);
         }
-        itemRecyclerGenericAdapter = new RecyclerGenericAdapter<Item>(getActivity(), recyclerItems)
+        itemRecyclerGenericAdapter = new RecyclerGenericAdapter<Item>(getActivity(), items)
         {
             @Override
             public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, int viewType, OnRecyclerItemClicked onRecyclerItemClicked, List item)
@@ -230,7 +259,16 @@ public class FragmentRecycler extends Fragment implements Callbacks
             {
                 RecyclerViewHolder recyclerViewHolder = (RecyclerViewHolder) holder;
                 recyclerViewHolder.title1.setText(item.getName());
-                recyclerViewHolder.title2.setText(getString(R.string.text_date) + ": " + item.getDateCreated());
+                switch(recyclerType)
+                {
+                    case Values.GROUPED_ITEMS:
+                        recyclerViewHolder.title2.setText("");
+                        break;
+                    case Values.ITEMS:
+                        recyclerViewHolder.title2.setText(getString(R.string.text_date) + ": " + item.getDateCreated());
+                        recyclerViewHolder.title3.setText("Price: " + String.format("%.2f", item.getPrice()) +" - Quality: " +item.getQuality_rating());
+                        break;
+                }
                 Glide
                         .with(context)
                         .using(new FirebaseImageLoader())
@@ -248,7 +286,15 @@ public class FragmentRecycler extends Fragment implements Callbacks
                     @Override
                     public void onItemClicked(View view, int position)
                     {
-                        toSelectedItem(position);
+                        switch(recyclerType)
+                        {
+                            case Values.GROUPED_ITEMS:
+                                toSelectedGroupedItem(position);
+                                break;
+                            case Values.ITEMS:
+                                toSelectedItem(position);
+                                break;
+                        }
                     }
                 };
             }
@@ -308,7 +354,6 @@ public class FragmentRecycler extends Fragment implements Callbacks
     private void setFAB()
     {
         fabAddItem.setVisibility(View.INVISIBLE);
-        fab2.setVisibility(View.GONE);
         fab1.setVisibility(View.GONE);
         fabAddItem.setLabelText(getString(R.string.button_item));
         fabAddItem.setImageDrawable(getResources().getDrawable(R.drawable.fab_add, getActivity().getTheme()));
@@ -321,10 +366,43 @@ public class FragmentRecycler extends Fragment implements Callbacks
             }
         });
 
+        switch(recyclerType)
+        {
+            case Values.GROUPED_ITEMS:
+                fabForecast.setVisibility(View.GONE);
+                break;
+            case Values.ITEMS:
+                fabForecast.setVisibility(View.INVISIBLE);
+                fabForecast.setImageDrawable(getResources().getDrawable(R.drawable.ic_forecast, getActivity().getTheme()));
+                fabForecast.setLabelText(getString(R.string.button_forecast));
+                fabForecast.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        forecast();
+                    }
+                });
+                break;
+        }
+
         if(!fabMenu.isShown())
         {
             showFabMenu();
         }
+    }
+
+    private void forecast() {
+        Log.i(TAG, "forecast: ");
+        Bundle bundle = new Bundle();
+        bundle.putString(Values.SELECTED_ITEM_NAME, itemName);
+        FragmentForecast fragment = new FragmentForecast();
+        fragment.setArguments(bundle);
+        getActivity()
+                .getSupportFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(R.anim.slide_up_in, R.anim.slide_down_out, R.anim.slide_up_in, R.anim.slide_down_out)
+                .replace(R.id.fragment_container_main, fragment, fragment.getTAG())
+                .addToBackStack(fragment.getTag())
+                .commit();
     }
 
     private void showFabMenu()
@@ -394,7 +472,7 @@ public class FragmentRecycler extends Fragment implements Callbacks
     private void searchList(String query)
     {
         List<Item> results = new ArrayList<>();
-        for (Item item : items)
+        for (Item item : recyclerItems)
         {
             if (item.toString().toLowerCase().contains(query.toLowerCase()))
             {
@@ -415,6 +493,26 @@ public class FragmentRecycler extends Fragment implements Callbacks
         bundle.putString(Values.DETAILS_TYPE, Values.ITEM);
         bundle.putString(Values.USER, userID);
         FragmentDetails fragment = new FragmentDetails();
+        fragment.setArguments(bundle);
+        getActivity()
+                .getSupportFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(R.anim.slide_right_in, R.anim.slide_left_out, R.anim.slide_left_in, R.anim.slide_right_out)
+                .replace(R.id.fragment_container_main, fragment, fragment.getTAG())
+                .addToBackStack(fragment.getTag())
+                .commit();
+    }
+
+    private void toSelectedGroupedItem(final int position)
+    {
+        Log.i(TAG, "toSelectedGroupedItem: ");
+        Bundle bundle = new Bundle();
+        Item item = recyclerItems.get(position);
+        Animations.toolbarAnimation(getActivity(), R.anim.slide_left_out, R.anim.slide_right_in, ImageUtils.getImage(item), R.raw.photo_pour_over);
+        bundle.putString(Values.SELECTED_ITEM_NAME, item.getName());
+        bundle.putString(Values.RECYCLER_TYPE, Values.ITEMS);
+        bundle.putString(Values.USER, userID);
+        FragmentRecycler fragment = new FragmentRecycler();
         fragment.setArguments(bundle);
         getActivity()
                 .getSupportFragmentManager()

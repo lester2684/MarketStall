@@ -18,10 +18,10 @@ public class RecyclerViewHolder extends RecyclerView.ViewHolder
     public RecyclerViewHolder(final View itemView, final RecyclerGenericAdapter.OnRecyclerItemClicked onRecyclerItemClicked)
     {
         super(itemView);
-        title1 = (TextView) itemView.findViewById(R.id.text_title1);
-        title2 = (TextView) itemView.findViewById(R.id.text_title2);
-        title3 = (TextView) itemView.findViewById(R.id.text_title3);
-        circularImageView = (CircularImageView) itemView.findViewById(R.id.image_view);
+        title1 = itemView.findViewById(R.id.text_title1);
+        title2 = itemView.findViewById(R.id.text_title2);
+        title3 = itemView.findViewById(R.id.text_title3);
+        circularImageView = itemView.findViewById(R.id.image_view);
 
         itemView.setOnClickListener(new View.OnClickListener()
         {

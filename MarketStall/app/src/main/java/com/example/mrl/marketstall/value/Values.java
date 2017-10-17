@@ -9,8 +9,11 @@ public class Values
     public final static String SELECTED_ITEM = "selected_item";
     public final static String EDIT_VALUE = "edit_value";
     public final static String RECYCLER_TYPE = "recycler_type";
+    public final static String TAB_RECYCLERS = "recycler_tab";
+    public final static String GROUPED_ITEMS = "grouped_items";
+    public final static String ITEMS = "items";
     public final static String USER = "user";
-    public final static String ITEM_NAME = "item_name";
+    public final static String SELECTED_ITEM_NAME = "item_name";
     public final static String USAGE_COUNT = "usage_count";
     public final static String COUNT = "count";
     public final static String DETAILS_TYPE = "details_type";
@@ -18,10 +21,6 @@ public class Values
     public final static String TAB_TYPE = "view_brew";
 
     public final static String ITEM = "item";
-    public final static String TAB_RECYCLERS = "recyclers";
-    public final static String TAB_ITEM_DETAILS = "item_details";
-    public final static String TAB_ITEM_EDIT = "item_edit";
-    public final static String TAB_ITEM_NEW = "item_new";
 
     public final static String TEXT_FIElD = "text";
     public final static String SPINNER = "spinner";

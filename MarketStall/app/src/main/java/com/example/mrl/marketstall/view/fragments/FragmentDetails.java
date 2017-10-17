@@ -324,7 +324,7 @@ public class FragmentDetails extends Fragment implements Callbacks {
     private void forecast() {
         Log.i(TAG, "forecast: ");
         Bundle bundle = new Bundle();
-        bundle.putString(Values.ITEM_NAME, item.getName());
+        bundle.putString(Values.SELECTED_ITEM_NAME, item.getName());
         FragmentForecast fragment = new FragmentForecast();
         fragment.setArguments(bundle);
         getActivity()

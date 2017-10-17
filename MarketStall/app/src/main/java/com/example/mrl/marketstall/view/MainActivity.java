@@ -193,7 +193,7 @@ public class MainActivity extends RuntimePermissionsActivity implements Navigati
         fabMenu.showMenuButton(true);
         frameLayout.removeAllViews();
         Bundle bundle = new Bundle();
-        bundle.putString(Values.RECYCLER_TYPE, Values.ITEM);
+        bundle.putString(Values.RECYCLER_TYPE, Values.GROUPED_ITEMS);
         bundle.putString(Values.USER, user.getUid());
         FragmentRecycler fragment = new FragmentRecycler();
         fragment.setArguments(bundle);
