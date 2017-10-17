@@ -65,6 +65,8 @@ public class MainActivity extends RuntimePermissionsActivity implements Navigati
     private FirebaseUser user;
     private TextView mStatusTextView;
     private TextView mDetailTextView;
+    private com.google.android.gms.common.SignInButton signInButton;
+    private LinearLayout signOutButton;
     private ImageView icon;
     private LinearLayout googleAuthLayout;
     private LayoutInflater inflater;
@@ -156,6 +158,9 @@ public class MainActivity extends RuntimePermissionsActivity implements Navigati
         drawLayout = findViewById(R.id.drawer_layout);
         mStatusTextView = findViewById(R.id.status);
         mDetailTextView = findViewById(R.id.detail);
+
+        signInButton =  findViewById(R.id.sign_in_button);
+        signOutButton = findViewById(R.id.sign_out_and_disconnect);
         icon = findViewById(R.id.google_icon);
         Glide
                 .with(this)
@@ -273,8 +278,8 @@ public class MainActivity extends RuntimePermissionsActivity implements Navigati
             mDetailTextView.setText(getString(R.string.firebase_status_fmt, user.getUid()));
 
             this.user = mAuth.getCurrentUser();
-            findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-            findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
+            signInButton.setVisibility(View.GONE);
+            signOutButton.setVisibility(View.VISIBLE);
 
             drawLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
             toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -295,8 +300,8 @@ public class MainActivity extends RuntimePermissionsActivity implements Navigati
             mStatusTextView.setText(R.string.signed_out);
             mDetailTextView.setText(null);
 
-            findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
-            findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
+            signInButton.setVisibility(View.VISIBLE);
+            signOutButton.setVisibility(View.GONE);
         }
     }
 

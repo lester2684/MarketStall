@@ -37,7 +37,7 @@ public abstract class RecyclerGenericAdapter<T> extends RecyclerView.Adapter<Rec
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position)
     {
-        onBindData(context, holder, items.get(position), position);
+        onBindData(context, holder, this.items.get(position), position);
     }
 
     @Override
@@ -49,7 +49,7 @@ public abstract class RecyclerGenericAdapter<T> extends RecyclerView.Adapter<Rec
 
     public void clear()
     {
-        items.clear();
+        this.items.clear();
         notifyDataSetChanged();
     }
 
@@ -63,8 +63,8 @@ public abstract class RecyclerGenericAdapter<T> extends RecyclerView.Adapter<Rec
     public void setItems(List<T> list)
     {
         if (!this.items.containsAll(list)) {
-            items = list;
-            this.notifyDataSetChanged();
+            this.items = list;
+            notifyDataSetChanged();
         }
     }
 
@@ -82,6 +82,6 @@ public abstract class RecyclerGenericAdapter<T> extends RecyclerView.Adapter<Rec
     public int getItemCount()
     {
 
-        return items.size();
+        return this.items.size();
     }
 }

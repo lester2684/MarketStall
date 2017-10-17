@@ -66,7 +66,7 @@ public class FragmentRecycler extends Fragment implements Callbacks
     private DatabaseReference itemCloudEndPoint;
     private DatabaseReference userCloudEndPoint;
     private List<Item> recyclerItems;
-    private List<Item> items;
+    private List<Item> itemsAll;
     private List<String> groupedItemsNames;
     private List<Suggestion> suggestions;
     private List<Suggestion> suggestionsSearch;
@@ -108,7 +108,7 @@ public class FragmentRecycler extends Fragment implements Callbacks
         userID = getArguments().getString(Values.USER);
         recyclerType = getArguments().getString(Values.RECYCLER_TYPE);
 
-        items = new ArrayList<>();
+        itemsAll = new ArrayList<>();
         recyclerItems = new ArrayList<>();
         suggestions = new ArrayList<>();
         groupedItemsNames = new ArrayList<>();
@@ -119,7 +119,7 @@ public class FragmentRecycler extends Fragment implements Callbacks
         itemCloudEndPoint.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                items.clear();
+                itemsAll.clear();
                 for (DataSnapshot itemSnapshot: dataSnapshot.getChildren()){
                     Item item = itemSnapshot.getValue(Item.class);
                     switch (recyclerType)
@@ -127,17 +127,17 @@ public class FragmentRecycler extends Fragment implements Callbacks
                         case Values.GROUPED_ITEMS:
                             if (!groupedItemsNames.contains(item.getName().toLowerCase())) {
                                 groupedItemsNames.add(item.getName().toLowerCase());
-                                items.add(item);
+                                itemsAll.add(item);
                             }
                             break;
                         case Values.ITEMS:
                             if (item.getName().equalsIgnoreCase(itemName)) {
-                                items.add(item);
+                                itemsAll.add(item);
                             }
                             break;
                     }
                 }
-                setupRecyclerView();
+                setupRecyclerView(itemsAll);
             }
 
             @Override
@@ -223,7 +223,7 @@ public class FragmentRecycler extends Fragment implements Callbacks
             public void onRefresh()
             {
                 searching = false;
-                updateList(items);
+                updateList(itemsAll);
             }
         });
         swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright,
@@ -232,10 +232,10 @@ public class FragmentRecycler extends Fragment implements Callbacks
                 android.R.color.holo_red_light);
     }
 
-    private void setupRecyclerView()
+    private void setupRecyclerView(List<Item> list)
     {
         TextView blankMessage = view.findViewById(R.id.blank_message);
-        if (items.size() == 0)
+        if (list.size() == 0)
         {
             blankMessage.setText(getString(R.string.add_item_message));
             blankMessage.setVisibility(View.VISIBLE);
@@ -244,7 +244,7 @@ public class FragmentRecycler extends Fragment implements Callbacks
         {
             blankMessage.setVisibility(View.GONE);
         }
-        itemRecyclerGenericAdapter = new RecyclerGenericAdapter<Item>(getActivity(), items)
+        itemRecyclerGenericAdapter = new RecyclerGenericAdapter<Item>(getActivity(), list)
         {
             @Override
             public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, int viewType, OnRecyclerItemClicked onRecyclerItemClicked, List item)
@@ -300,7 +300,6 @@ public class FragmentRecycler extends Fragment implements Callbacks
             }
         };
         recyclerView.setAdapter(itemRecyclerGenericAdapter);
-        updateList(items);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST);
@@ -442,12 +441,14 @@ public class FragmentRecycler extends Fragment implements Callbacks
             suggestionsArray.add(s.getName());
             for (Item item : list)
             {
-                if (item.getName().equalsIgnoreCase(s.getName()))
-                {
-                    sortedItems.add(item);
+                if (!sortedItems.contains(item)) {
+                    if (item.getName().toLowerCase().contains(s.getName().toLowerCase())) {
+                        sortedItems.add(item);
+                    }
                 }
             }
         }
+        Log.d(TAG, "updateList: " + sortedItems);
         for (Item item : list)
         {
             if (!sortedItems.contains(item))
@@ -458,21 +459,28 @@ public class FragmentRecycler extends Fragment implements Callbacks
         String[] mStringArray = new String[suggestionsArray.size()];
         mStringArray = suggestionsArray.toArray(mStringArray);
         searchView.setSuggestions(mStringArray);
-        if (!searching) {
-            recyclerItems = sortedItems;
-            if (itemRecyclerGenericAdapter != null) {
-                itemRecyclerGenericAdapter.clear();
-                itemRecyclerGenericAdapter.addAll(recyclerItems);
-                itemRecyclerGenericAdapter.notifyDataSetChanged();
-                swipeRefreshLayout.setRefreshing(false);
-            }
+        recyclerItems = sortedItems;
+        List<Item> temp = new ArrayList<>();
+        for (Item item : itemsAll)
+        {
+            temp.add(item);
         }
+        if (itemRecyclerGenericAdapter != null) {
+            itemRecyclerGenericAdapter.clear();
+            itemRecyclerGenericAdapter.addAll(recyclerItems);
+            swipeRefreshLayout.setRefreshing(false);
+        }
+        itemsAll = temp;
     }
 
     private void searchList(String query)
     {
         List<Item> results = new ArrayList<>();
-        for (Item item : recyclerItems)
+        if (query.isEmpty())
+        {
+            updateList(itemsAll);
+        }
+        for (Item item : itemsAll)
         {
             if (item.toString().toLowerCase().contains(query.toLowerCase()))
             {
@@ -617,7 +625,7 @@ public class FragmentRecycler extends Fragment implements Callbacks
     public void onResume()
     {
         Log.i(TAG, "onResume: ");
-        updateList(items);
+        updateList(itemsAll);
         super.onResume();
     }
 
