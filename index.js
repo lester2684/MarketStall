@@ -11,7 +11,7 @@ exports.updateForecast = functions.database.ref('/items/{itemid}').onWrite( even
 });
 
 function calculateForecast(event){
-    var daysNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    var daysNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 	var daysItemCount = [0, 0, 0, 0, 0, 0, 0];
 	var daysItemtotalPrice = [0, 0, 0, 0, 0, 0, 0];
 	var daysItemPriceAverage = [0, 0, 0, 0, 0, 0, 0];
