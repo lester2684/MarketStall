@@ -61,7 +61,7 @@ function calculateForecast(event){
 		}
 		
 		console.log(dataArray);
-		rootRef.child('forecasts').child(item.name).set(dataArray);
+		rootRef.child('forecasts').child(item.name.toLowerCase()).set(dataArray);
 	}).catch(reason => {
 		console.log(reason);
 	});
