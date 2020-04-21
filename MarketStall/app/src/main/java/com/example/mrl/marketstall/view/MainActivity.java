@@ -55,8 +55,6 @@ import static com.example.mrl.marketstall.utils.Utils.getCurrentFragment;
 public class MainActivity extends RuntimePermissionsActivity implements NavigationView.OnNavigationItemSelectedListener, AppBarLayout.OnOffsetChangedListener,  View.OnClickListener, GoogleApiClient.OnConnectionFailedListener{
 
     private final String TAG = getClass().getSimpleName();
-    private Callbacks currentFragmentCallback;
-    private Callbacks nextFragmentCallback;
     private ActionBarDrawerToggle toggle;
 
     private static final int RC_SIGN_IN = 9001;
@@ -67,9 +65,6 @@ public class MainActivity extends RuntimePermissionsActivity implements Navigati
     private TextView mDetailTextView;
     private com.google.android.gms.common.SignInButton signInButton;
     private LinearLayout signOutButton;
-    private ImageView icon;
-    private LinearLayout googleAuthLayout;
-    private LayoutInflater inflater;
     public ProgressDialog mProgressDialog;
     private FrameLayout frameLayout;
     private DrawerLayout drawLayout;
@@ -150,8 +145,8 @@ public class MainActivity extends RuntimePermissionsActivity implements Navigati
 
     private void setupView()
     {
-        inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        googleAuthLayout = (LinearLayout) inflater.inflate(R.layout.fragment_google_auth, null);
+        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LinearLayout googleAuthLayout = (LinearLayout) inflater.inflate(R.layout.fragment_google_auth, null);
         frameLayout = findViewById(R.id.fragment_container_main);
         frameLayout.addView(googleAuthLayout);
 
@@ -161,7 +156,7 @@ public class MainActivity extends RuntimePermissionsActivity implements Navigati
 
         signInButton =  findViewById(R.id.sign_in_button);
         signOutButton = findViewById(R.id.sign_out_and_disconnect);
-        icon = findViewById(R.id.google_icon);
+        ImageView icon = findViewById(R.id.google_icon);
         Glide
                 .with(this)
                 .load(R.raw.firebase_lockup_400)
@@ -171,7 +166,6 @@ public class MainActivity extends RuntimePermissionsActivity implements Navigati
         findViewById(R.id.disconnect_button).setOnClickListener(this);
         fabMenu = this.findViewById(fab_menu);
         fabMenu.hideMenuButton(true);
-
         drawLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
     }
 
@@ -472,7 +466,7 @@ public class MainActivity extends RuntimePermissionsActivity implements Navigati
         }
         else
         {
-            currentFragmentCallback = (Callbacks) getCurrentFragment(getSupportFragmentManager());
+            Callbacks currentFragmentCallback = (Callbacks) getCurrentFragment(getSupportFragmentManager());
             if(currentFragmentCallback != null)
             {
                 currentFragmentCallback.onBackPressedCallback();
@@ -480,7 +474,7 @@ public class MainActivity extends RuntimePermissionsActivity implements Navigati
                 if (getSupportFragmentManager().getBackStackEntryCount() > 1)
                 {
                     super.onBackPressed();
-                    nextFragmentCallback = (Callbacks) getCurrentFragment(getSupportFragmentManager());
+                    Callbacks nextFragmentCallback = (Callbacks) getCurrentFragment(getSupportFragmentManager());
                     if(nextFragmentCallback != null)
                     {
                         nextFragmentCallback.onReturn(fragment, currentFragmentCallback.getTabType());
